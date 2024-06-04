@@ -2,6 +2,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Registry from "@/components/registry";
 import Publish from "@/components/publish";
 import Guide from "@/components/guidex";
+import Footer from "@/components/footer";
 
 // import { DM_Sans} from "next/font/google";
 // const dmSane = DM_Sans({ subsets: ["latin"] });
@@ -19,15 +20,14 @@ export default function Home() {
               <TabsTrigger value="guide" className="rounded-full p-3 px-4 data-[state=active]:bg-[#68A04E] data-[state=active]:text-white">Guide</TabsTrigger>
           </TabsList>
         </div>
-        <div className="my-20 w-full h-full">
+        <div className="my-10 w-full h-full">
           <TabsContent value="explore"><Registry/></TabsContent>
           <TabsContent value="publish"><Publish/></TabsContent>
           <TabsContent value="guide"><Guide/></TabsContent>
         </div>
       </Tabs>
     </main>
-      <footer className="bg-[#68A04E] p-10 text-white">
-        APM
-      </footer></>
+      <Footer />
+    </>
   );
 }
