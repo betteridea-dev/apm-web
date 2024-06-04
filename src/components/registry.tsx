@@ -11,6 +11,8 @@ import { connect } from "@permaweb/aoconnect"
 import betterideaSVG from "@/assets/betteridea.svg"
 import learnSVG from "@/assets/learn.svg"
 
+import { APM_ID } from "@/utils/ao-vars"
+
 function ExploreItem({ title, description, link, icon }:{ title: string, description: string, link: string, icon?:React.ReactNode }) {
     return <Link href={link} target="_blank"
         className="bg-white p-5 flex flex-col gap-2 rounded-[16px] hover:scale-105 hover:shadow-lg transition-all duration-200">
@@ -28,11 +30,14 @@ function PackageItem({data}:{data:Package}) {
 }
 
 type Package = {
-    Name: string,
     Vendor: string,
+    Name: string,
     Version: string,
     Description: string,
     Owner: string,
+    RepositoryUrl: string,
+    PkgID: string,
+    Installs: number
 }
 
 export default function Registry() {
@@ -45,7 +50,7 @@ export default function Registry() {
     async function getAllPackages() {
         setFetching(true)
         const res = await ao.dryrun({
-            process: "ZHUZLCewiKWFZPlq6cAHgES0XZyZgvUUVaKPLEcTsA8",
+            process: APM_ID,
             tags: [{ name: "Action", value: "GetAllPackages" }],
 
         })
@@ -74,7 +79,7 @@ export default function Registry() {
         async function searchPackages() {
             setFetching(true)
             const res = await ao.dryrun({
-                process: "ZHUZLCewiKWFZPlq6cAHgES0XZyZgvUUVaKPLEcTsA8",
+                process: APM_ID,
                 tags: [{ name: "Action", value: "Search" }],
                 data:  searchQuery 
             })

@@ -1,3 +1,161 @@
+import { useState, useEffect, Dispatch, SetStateAction } from "react"
+
+import { CodeIcon, FileIcon, FileTextIcon, IdCardIcon, InfoCircledIcon, Link1Icon, PersonIcon, TimerIcon, VercelLogoIcon } from "@radix-ui/react-icons"
+import { Button } from "./ui/button"
+import { useToast } from "@/components/ui/use-toast"
+
+import { connect, createDataItemSigner } from "@permaweb/aoconnect"
+import { APM_ID } from "@/utils/ao-vars"
+
+type Tag = {
+    name: string,
+    value: string
+}
+
+
+function TextInput({ placeholder, onChange, icon }: {
+    placeholder: string,
+    onChange: Dispatch<SetStateAction<string>>,
+    icon: React.ReactNode
+}) {
+    return <div className="bg-[#EEE] p-3 rounded-[16px] flex gap-2 items-center">
+        <div>{icon}</div>
+        <input className="outline-none w-full bg-transparent text-[#666]" placeholder={placeholder} onChange={(e) => onChange(e.target.value)} />
+    </div>
+}
+
+function FileInput({ placeholder, onChange, icon, allow }: {
+    placeholder: string,
+    onChange: Dispatch<SetStateAction<string>>,
+    icon: React.ReactNode,
+    allow?: string
+}) {
+    return <div className="bg-[#EEE] p-3 rounded-[16px] flex gap-2 items-center">
+        <div>{icon}</div>
+        <label className="min-w-fit" htmlFor={placeholder}>{placeholder}</label>
+        <input accept={allow || "*"} type="file" id={placeholder} className="outline-none w-full bg-transparent text-[#666]" placeholder={placeholder} onChange={(e) => {
+            if (!e.target.files) return
+            const reader = new FileReader()
+            reader.readAsText(e.target.files[0])
+            reader.onload = (e) => {
+                console.log(e.target?.result)
+                onChange(e.target?.result as string)
+            }
+        }} />
+    </div>
+}
+
 export default function Publish() {
-    return <div><div className="text-bold">Publish</div></div>
+    const [packageName, setPackageName] = useState<string>("")
+    const [vendorName, setVendorName] = useState<string>("")
+    const [version, setVersion] = useState<string>("")
+    const [shortDescription, setShortDescription] = useState<string>("")
+    const [readme, setReadme] = useState<string>("")
+    const [main, setMain] = useState<string>("")
+    const [repositoryUrl, setRepositoryUrl] = useState<string>("")
+    const [address, setAddress] = useState<string>("")
+
+    const ao = connect()
+    const { toast } = useToast()
+
+    async function onPublishClicked() {
+        // check existence
+        if (!packageName) return toast({ title: "Package name is required", description: "Please provide a package name" })
+        if (!shortDescription) return toast({ title: "Short description is required", description: "Please provide a short description", })
+        if (!readme) return toast({ title: "Readme file is required", description: "Please provide a readme file", })
+        if (!main) return toast({ title: "main.lua file is required", description: "Please provide a main file", })
+        // check for valid url
+        if (repositoryUrl && !repositoryUrl.match(/^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i)) return toast({ title: "Invalid repository url", description: "Please provide a valid repository url" })
+        // validate strings with regex
+        if (!packageName.match(/^[a-z0-9-_]+$/i)) return toast({ title: "Invalid package name", description: "Package name should only contain alphanumeric characters, dashes and underscores" })
+        if (vendorName && !vendorName.match(/^@[a-z]+$/i)) return toast({ title: "Invalid vendor name", description: "Vendor name should only contain alphabetical characters and must start with @" })
+        // if (vendorName && !vendorName.match(/^@[a-z0-9-_]+$/i)) return toast({ title: "Invalid vendor name", description: "Vendor name should only contain alphanumeric characters, dashes and underscores, and must start with @" })
+        if (version && !version.match(/^\d+\.\d+\.\d+$/)) return toast({ title: "Invalid version", description: "Version should be in the format major.minor.patch" })
+
+        // publish
+        const data = {
+            Name: packageName,
+            Vendor: vendorName || "@apm",
+            Version: version || "1.0.0",
+            PackageData: {
+                Readme: readme,
+                // convert readme to hex string
+                // Readme: Buffer.from(readme).toString('hex'),
+                Description: shortDescription,
+                Main: "main.lua",
+                Dependencies: [],
+                RepositoryUrl: repositoryUrl,
+                Items: [
+                    {
+                        meta: { name: "main.lua" },
+                        data: main,
+                        // convert main to hex string
+                        // data: Buffer.from(main).toString('hex')
+                    }
+                ],
+                Authors: []
+            }
+        }
+        console.log("publishing", data)
+
+        // const res =await ao.dryrun({
+        //     process: APM_ID,
+        //     tags: [{ name: "Action", value: "Publish" }],
+        //     data: JSON.stringify(data)
+        // })
+
+        const m_id = await ao.message({
+            process: APM_ID,
+            data: JSON.stringify(data),
+            tags: [{ name: "Action", value: "Publish" }],
+            signer: createDataItemSigner(window.arweaveWallet)
+        })
+        console.log(m_id)
+
+        const res = await ao.result({
+            process: APM_ID,
+            message: m_id
+        })
+        console.log(res)
+        const { Messages } = res
+
+        if (Messages.length == 0) {
+            const { Output } = res
+            if(Output.data) return toast({ title: "Error!", description: Output.data })
+        }
+
+        const tags = Messages[0].Tags
+
+        tags.forEach((tag:Tag,_:number) => {
+            console.log(tag.name, tag.value)
+            if (tag.name == "Result" && tag.value == "success") {
+                toast({ title: "Published!", description: "Package published successfully" })
+            }else if(tag.name == "Result" && tag.value == "error"){
+                toast({ title: "Error!", description: "An error occured while publishing the package" })
+            }
+        })
+    }
+
+    async function connectWallet() {
+        await window.arweaveWallet.connect(["SIGN_TRANSACTION", "ACCESS_ADDRESS"])
+        const addr = await window.arweaveWallet.getActiveAddress()
+        setAddress(addr)
+        toast({ title: "Connected!", description: `Connected with address ${addr}` })
+    }
+
+
+    return <div>
+        <div className="mb-5"><span className="text-xl font-bold p-5">Publish</span> Publish your own package</div>
+        <div className="flex flex-col gap-4">
+            <TextInput placeholder="Package name" onChange={setPackageName} icon={<IdCardIcon width={25} height={25} />} />
+            <TextInput placeholder="Vendor name (optional - default @apm)" onChange={setVendorName} icon={<PersonIcon width={25} height={25} />} />
+            <TextInput placeholder="Version (major.minor.patch - default 1.0.0)" onChange={setVersion} icon={<TimerIcon width={25} height={25} />} />
+            <TextInput placeholder="Short Description" onChange={setShortDescription} icon={<InfoCircledIcon width={25} height={25} />} />
+            <FileInput placeholder="Upload README.md" allow=".md" onChange={setReadme} icon={<FileTextIcon width={25} height={25} />} />
+            <FileInput placeholder="Upload main.lua" allow=".lua" onChange={setMain} icon={<CodeIcon width={25} height={25} />} />
+            <TextInput placeholder="Repository Url" onChange={setRepositoryUrl} icon={<Link1Icon width={25} height={25} />} />
+            
+            {address ? <Button className="bg-[#666]" onClick={onPublishClicked}>Publish</Button> : <Button className="bg-[#666]" onClick={connectWallet}>Connect Wallet</Button>}
+        </div>
+    </div>
 }

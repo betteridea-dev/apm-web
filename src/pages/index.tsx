@@ -1,4 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Toaster } from "@/components/ui/toaster"
+
 import Registry from "@/components/registry";
 import Publish from "@/components/publish";
 import Guide from "@/components/guidex";
@@ -9,7 +11,8 @@ import Footer from "@/components/footer";
 
 export default function Home() {
   return (
-  <>
+    <>
+      <Toaster/>
     <main className="min-h-screen">
       <Tabs defaultValue="explore" className="w-full flex flex-col items-center p-5 md:p-10 md:px-24">
         <div className="flex flex-col items-center justify-center relative w-full">
