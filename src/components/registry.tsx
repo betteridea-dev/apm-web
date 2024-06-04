@@ -3,8 +3,19 @@ import Image from "next/image"
 import Link from "next/link"
 
 import { Skeleton } from "@/components/ui/skeleton"
+import {
+    Drawer,
+    DrawerClose,
+    DrawerContent,
+    DrawerDescription,
+    DrawerFooter,
+    DrawerHeader,
+    DrawerTitle,
+    DrawerTrigger,
+} from "@/components/ui/drawer"
 
-import { MagnifyingGlassIcon } from "@radix-ui/react-icons"
+
+import { IdCardIcon, MagnifyingGlassIcon, PersonIcon } from "@radix-ui/react-icons"
 
 import { connect } from "@permaweb/aoconnect"
 
@@ -23,10 +34,30 @@ function ExploreItem({ title, description, link, icon }:{ title: string, descrip
 
 function PackageItem({data}:{data:Package}) {
     const title = `${data.Vendor == "@apm" ? "" : data.Vendor + "/"}${data.Name}@${data.Version}`
-    return <div className="bg-[#eee] p-6 px-7 rounded-[16px] ring-1 ring-[#e7e7e7] cursor-pointer">
-        <div className="w-full flex justify-between"><span className="font-semibold text-[18px]">{title}</span> <span className="text-[#626262] text-sm">{data.Installs} installs</span></div>
-        <div className="text-[16px]">{data.Description}</div>
-    </div>
+
+    function openChange(open:boolean) {
+        if (!open) return console.log("closed", data.PkgID)
+        console.log("opened", data.PkgID)
+    }
+
+    return <Drawer onOpenChange={openChange}>
+        <DrawerTrigger className="bg-[#eee] p-6 px-7 rounded-[16px] ring-1 ring-[#e7e7e7] cursor-pointer">
+            <div className="w-full flex justify-between"><span className="font-semibold text-[18px]">{title}</span> <span className="text-[#626262] text-sm">{data.Installs} installs</span></div>
+            <div className="text-[16px] text-left">{data.Description}</div>
+        </DrawerTrigger>
+        <DrawerContent className=" h-4/5">
+            <DrawerHeader>
+                <DrawerTitle>{title}</DrawerTitle>
+                <DrawerDescription>{data.Description}</DrawerDescription>
+                {data.Owner && <div className="flex items-center gap-2"><PersonIcon /> <span>{data.Owner}</span></div>}
+                {data.PkgID && <div className="flex items-center gap-2"><IdCardIcon /> <span>{data.PkgID}</span></div>}
+                <div className="bg-[#eee] rounded-[16px] p-3 px-5 w-fit flex flex-col">Install with <code className="bg-white mt-3 p-3 rounded-[16px]">APM.install("{title}")</code></div>
+            </DrawerHeader>
+            <DrawerFooter>
+                <Link href={data.RepositoryUrl} target="_blank" className="bg-[#68A04E] text-white p-3 rounded-[16px]">View on GitHub</Link>
+            </DrawerFooter>
+        </DrawerContent>
+    </Drawer>
 }
 
 type Package = {
@@ -105,7 +136,7 @@ export default function Registry() {
                     <MagnifyingGlassIcon height={20} width={20} className="stroke-[#666] mx-2"/>
                     <input className="outline-none w-full bg-transparent text-[#666]" placeholder="Search" onChange={(e)=>setSearchDebouncer(e.target.value)} />
                 </div>
-            <div className="flex flex-col gap-3 overflow-scroll max-h-[64vh] py-1 px-0.5 rounded-[16px]">
+            <div className="flex flex-col gap-3 overflow-scroll py-1 px-0.5 rounded-[16px]">
                 {
                     fetching ? <>
                             <div className="space-y-2">
