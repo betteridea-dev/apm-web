@@ -20,6 +20,7 @@ import { APM_ID } from "@/utils/ao-vars"
 import Markdown from "markdown-to-jsx"
 import betterideaSVG from "@/assets/betteridea.svg"
 import learnSVG from "@/assets/learn.svg"
+import { Package } from "@/utils/ao-vars"
 
 function ExploreItem({ title, description, link, icon }:{ title: string, description: string, link: string, icon?:React.ReactNode }) {
     return <Link href={link} target="_blank"
@@ -30,38 +31,12 @@ function ExploreItem({ title, description, link, icon }:{ title: string, descrip
 }
 
 function PackageItem({data}:{data:Package}) {
-    const [pkg, setPackage] = useState<Package>(data)
     const title = `${data.Vendor == "@apm" ? "" : data.Vendor + "/"}${data.Name}`
-
-    async function fetchPackage() {
-        const ao = connect()
-        const res =await ao.dryrun({
-            process: APM_ID,
-            tags: [{ name: "Action", value: "Info" }], 
-            data: JSON.stringify({ PkgID: data.PkgID})
-        })
-        console.log(res)
-
-        const { Messages, Output } = res
-        if (Messages.length == 0) {
-            toast.error(Output.data)
-        } else {
-            try{
-            const data = JSON.parse(Messages[0].Data)
-                console.log(data)
-            setPackage(data)
-            }
-            catch (e) {
-                console.error(e)
-            }
-        }
-
-    }
 
     function openChange(open:boolean) {
         if (!open) return console.log("closed", data.PkgID)
         console.log("opened", data.PkgID)
-        fetchPackage()
+        // fetchPackage()
 
     }
 
@@ -83,35 +58,16 @@ function PackageItem({data}:{data:Package}) {
             </DrawerHeader>
             <DrawerFooter>
                 <div className="flex flex-col min-w-[28vw] gap-2">
-                    <div>{pkg.Installs} installs for V{ pkg.Version}</div>
+                    <div>{data.Installs} installs for V{data.Version}</div>
                     <div className="bg-[#eee] rounded-[16px] p-3 px-5 flex flex-col">Installation command <code className="bg-white mt-3 p-3 rounded-[16px] pointer-events-auto">APM.install("{title}")</code></div>
                     <div className="flex gap-2 justify-center">
-                        <Link href={`/pkg/${pkg.PkgID}`} target="_blank" className="bg-[#68A04E] flex justify-between pr-4 gap-4 text-white p-3 rounded-[16px]">More details <InfoCircledIcon width={25} height={25} /></Link>
-                        <Link href={data.RepositoryUrl} target="_blank" className="bg-[#68A04E] flex justify-between pr-4 gap-4 text-white p-3 rounded-[16px]">View on GitHub <GitHubLogoIcon width={25} height={25} /></Link>
+                        <Link href={`/pkg?id=${data.PkgID}`} target="_blank" className="bg-[#68A04E] flex justify-between pr-4 gap-4 text-white p-3 rounded-[16px]">More details <InfoCircledIcon width={25} height={25} /></Link>
+                        <Link href={data.RepositoryUrl||"#"} target="_blank" className="bg-[#68A04E] flex justify-between pr-4 gap-4 text-white p-3 rounded-[16px]">View on GitHub <GitHubLogoIcon width={25} height={25} /></Link>
                     </div>
                 </div>
             </DrawerFooter>
         </DrawerContent>
     </Drawer>
-}
-
-type Package = {
-    Authors_: string[],
-    Dependencies:string[],
-    Description: string,
-    ID:number,
-    Installs: number,
-    Items: string,
-    Main: string,
-    Name:string,
-    Owner: string,
-    PkgID: string,
-    README: string,
-    RepositoryUrl: string,
-    Updated:number,
-    Vendor: string,
-    Version: string,
-    
 }
 
 export default function Registry() {
@@ -180,7 +136,6 @@ export default function Registry() {
                     <input className="outline-none w-full bg-transparent text-[#666]" placeholder="Search" onChange={(e)=>setSearchDebouncer(e.target.value)} />
                 </div>
             <div className="flex flex-col gap-3 overflow-scroll py-1 px-0.5 rounded-[16px]">
-                <PackageItem data={{ Vendor: "@apm", Name: "ao", Version: "1.0.0", Description: "The core AO package", Owner: "arweave", RepositoryUrl: "google.com", PkgID: "EtUmwuUsPAy4qS7yy1A7m_wK4xQB3EWrJu7Wg-t45sk", Installs: 100}} />
                 {
                     fetching ? <>
                             <div className="space-y-2">
