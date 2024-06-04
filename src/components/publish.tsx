@@ -2,7 +2,7 @@ import { useState, useEffect, Dispatch, SetStateAction } from "react"
 
 import { CodeIcon, FileIcon, FileTextIcon, IdCardIcon, InfoCircledIcon, Link1Icon, PersonIcon, TimerIcon, VercelLogoIcon } from "@radix-ui/react-icons"
 import { Button } from "./ui/button"
-import { useToast } from "@/components/ui/use-toast"
+import { toast } from "sonner"
 
 import { connect, createDataItemSigner } from "@permaweb/aoconnect"
 import { APM_ID } from "@/utils/ao-vars"
@@ -56,21 +56,19 @@ export default function Publish() {
     const [address, setAddress] = useState<string>("")
 
     const ao = connect()
-    const { toast } = useToast()
 
     async function onPublishClicked() {
         // check existence
-        if (!packageName) return toast({ title: "Package name is required", description: "Please provide a package name" })
-        if (!shortDescription) return toast({ title: "Short description is required", description: "Please provide a short description", })
-        if (!readme) return toast({ title: "Readme file is required", description: "Please provide a readme file", })
-        if (!main) return toast({ title: "main.lua file is required", description: "Please provide a main file", })
+        if (!packageName) return toast.error("Package name is required")
+        if (!shortDescription) return toast.error("Short description is required")
+        if (!readme) return toast.error("Readme file is required")
+        if (!main) return toast.error("main.lua file is required")
         // check for valid url
-        if (repositoryUrl && !repositoryUrl.match(/^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i)) return toast({ title: "Invalid repository url", description: "Please provide a valid repository url" })
+        if (repositoryUrl && !repositoryUrl.match(/^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i)) return toast.error("Invalid repository url")
         // validate strings with regex
-        if (!packageName.match(/^[a-z0-9-_]+$/i)) return toast({ title: "Invalid package name", description: "Package name should only contain alphanumeric characters, dashes and underscores" })
-        if (vendorName && !vendorName.match(/^@[a-z]+$/i)) return toast({ title: "Invalid vendor name", description: "Vendor name should only contain alphabetical characters and must start with @" })
-        // if (vendorName && !vendorName.match(/^@[a-z0-9-_]+$/i)) return toast({ title: "Invalid vendor name", description: "Vendor name should only contain alphanumeric characters, dashes and underscores, and must start with @" })
-        if (version && !version.match(/^\d+\.\d+\.\d+$/)) return toast({ title: "Invalid version", description: "Version should be in the format major.minor.patch" })
+        if (!packageName.match(/^[a-z0-9-_]+$/i)) return toast.error("Package name should only contain alphanumeric characters, dashes and underscores")
+        if (vendorName && !vendorName.match(/^@[a-z]+$/i)) return toast.error("Vendor name should only contain alphabetical characters, and must start with @")
+        if (version && !version.match(/^\d+\.\d+\.\d+$/)) return toast.error("Version should be in the format major.minor.patch")
 
         // publish
         const data = {
@@ -121,7 +119,7 @@ export default function Publish() {
 
         if (Messages.length == 0) {
             const { Output } = res
-            if(Output.data) return toast({ title: "Error!", description: Output.data })
+            if(Output.data) return toast.error(Output.data)
         }
 
         const tags = Messages[0].Tags
@@ -129,9 +127,9 @@ export default function Publish() {
         tags.forEach((tag:Tag,_:number) => {
             console.log(tag.name, tag.value)
             if (tag.name == "Result" && tag.value == "success") {
-                toast({ title: "Published!", description: "Package published successfully" })
+                toast.success("Package published successfully")
             }else if(tag.name == "Result" && tag.value == "error"){
-                toast({ title: "Error!", description: "An error occured while publishing the package" })
+                toast.error("Error while publishing")
             }
         })
     }
@@ -140,7 +138,7 @@ export default function Publish() {
         await window.arweaveWallet.connect(["SIGN_TRANSACTION", "ACCESS_ADDRESS"])
         const addr = await window.arweaveWallet.getActiveAddress()
         setAddress(addr)
-        toast({ title: "Connected!", description: `Connected with address ${addr}` })
+        toast.info(`Conencted to ${addr}`)
     }
 
 
