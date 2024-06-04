@@ -48,7 +48,7 @@ export default function PackageView() {
         <Link href="/" className="text-3xl p-5 flex gap-3 items-center"><Image width={30} height={30} alt="apm" src={betterideaSVG} /> APM (beta)</Link>
         <hr className="my-3"/>
         <div className="text-3xl pl-5 font-bold">
-            { pkg?.Vendor&&( ["@apm"].includes(pkg?.Vendor as string)?"":`${pkg?.Vendor}/`)}{pkg?.Name}
+            { pkg?.Vendor&&( ["@apm"].includes(pkg?.Vendor as string)?"":`${pkg?.Vendor}/`)}{pkg?.Name ? pkg?.Name : "Loading..."}
         </div>
         <div className="pl-5">{pkg?.Description}</div>
         <div className="pl-5">{pkg?.Version && `V${pkg?.Version}`}</div>
@@ -63,9 +63,10 @@ export default function PackageView() {
                     <TabsTrigger value="source" className="rounded-full p-3 px-4 data-[state=active]:bg-[#68A04E] data-[state=active]:text-white">Source Code</TabsTrigger>
                     {/* <TabsTrigger value="info" className="rounded-full p-3 px-4 data-[state=active]:bg-[#68A04E] data-[state=active]:text-white">Info</TabsTrigger> */}
                     <TabsTrigger value="install" className="rounded-full p-3 px-4 data-[state=active]:bg-[#68A04E] data-[state=active]:text-white">Install</TabsTrigger>
+                    <TabsTrigger value="versions" className="rounded-full p-3 px-4 data-[state=active]:bg-[#68A04E] data-[state=active]:text-white">Version History</TabsTrigger>
                 </TabsList>
             </div>
-            <div className="my-5 w-full h-full px-5 bg-[#eee] rounded-[16px]">
+            <div className="my-5 w-full h-full px-5 bg-[#eee] rounded-[16px] pb-2">
                 <TabsContent value="readme">
                     <Markdown className="markdown overflow-scroll">{Buffer.from(pkg?.README||"", 'hex').toString()}</Markdown>
                 </TabsContent>
@@ -87,6 +88,9 @@ export default function PackageView() {
                 </TabsContent>
                 <TabsContent value="install">
                     <div className="flex flex-col p-5">Installation command <code className="bg-white mt-3 p-3 rounded-[16px] pointer-events-auto">APM.install("{pkg?.Vendor=="@apm"?"":pkg?.Vendor+"/"}{pkg?.Name}")</code></div>
+                </TabsContent>
+                <TabsContent value="versions">
+                    TODO
                 </TabsContent>
             </div>
         </Tabs>
