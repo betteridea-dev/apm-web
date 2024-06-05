@@ -30,10 +30,11 @@ function ExploreItem({ title, description, link, icon }:{ title: string, descrip
     </Link>
 }
 
-function PackageItem({data}:{data:Package}) {
+function PackageItem({data,setTitleVisible}:{data:Package, setTitleVisible:(b:boolean)=>void}) {
     const title = `${data.Vendor == "@apm" ? "" : data.Vendor + "/"}${data.Name}`
 
-    function openChange(open:boolean) {
+    function openChange(open: boolean) {
+        setTitleVisible(!open)
         if (!open) return console.log("closed", data.PkgID)
         console.log("opened", data.PkgID)
         // fetchPackage()
@@ -46,6 +47,7 @@ function PackageItem({data}:{data:Package}) {
             <div className="w-full flex justify-between items-end"><div className="text-[16px] text-left">{data.Description}</div> <span className="text-sm text-[#626262]">V{data.Version}</span></div>
         </DrawerTrigger>
         <DrawerContent className="md:px-7">
+            <title>{data.Vendor}/{ data.Name} | APM | BetterIDEa</title>
             <DrawerHeader className="flex flex-col md:flex-row justify-between ">
                 <div className="flex flex-col items-start">
                     <DrawerTitle className="text-xl">{title}</DrawerTitle>
@@ -75,6 +77,7 @@ export default function Registry() {
     const [searchDebouncer, setSearchDebouncer] = useState<string>("")
     const [searchQuery, setSearchQuery] = useState<string>("")
     const [packages, setPackages] = useState<Package[]>([])
+    const [titleVisible, setTitleVisible] = useState(true)
     const ao = connect()
 
     async function getAllPackages() {
@@ -129,6 +132,7 @@ export default function Registry() {
     },[packages])
 
     return <div className="grid grid-cols-1 md:grid-cols-5 gap-5 outline-none ring-none">
+        {titleVisible&&<title>Registry | APM | BetterIDEa</title>}
         <div className="col-span-3">
             <div><span className="text-xl font-bold p-5">Registry</span> Find published packages</div>
                 <div className="bg-[#EEE] p-3 rounded-[16px] flex gap-2 items-center my-5">
@@ -143,7 +147,7 @@ export default function Registry() {
                                 <Skeleton className="h-4 w-[90%]" />
                             </div>
                     </> : packages.length>0? packages.map((pkg, i) => {
-                        return <PackageItem data={pkg} key={i} />
+                        return <PackageItem setTitleVisible={setTitleVisible} data={pkg} key={i} />
                     }) : "No Packages Found"
                 }
                 {/* <PackageItem title="@betteridea/testpkg - 1.0.1" description="This is dummy description for a package registered on APM" installs={72} />

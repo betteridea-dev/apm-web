@@ -147,6 +147,7 @@ export default function Publish() {
 
 
     return <div>
+        <title>Publish | APM | BetterIDEa</title>
         <div className="mb-5"><span className="text-xl font-bold p-5">Publish</span> Publish your own package</div>
         <div className="flex flex-col gap-4">
             <TextInput placeholder="Package name" onChange={setPackageName} icon={<IdCardIcon width={25} height={25} />} />

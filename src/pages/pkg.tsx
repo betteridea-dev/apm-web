@@ -85,6 +85,7 @@ export default function PackageView() {
     },[id,name])
 
     return <div className="p-5">
+        <title suppressHydrationWarning>{pkg?.Name ?`${pkg?.Vendor}/${pkg?.Name}`:"Loading..."} | APM | BetterIDEa</title>
         <Link href="/" className="text-3xl p-5 flex gap-3 items-center"><Image width={30} height={30} alt="apm" src={betterideaSVG} /> APM (beta)</Link>
         <hr className="my-3"/>
         <div className="text-3xl md:ml-5 font-bold">
