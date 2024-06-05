@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/sonner"
 
 import Registry from "@/components/registry";
 import Publish from "@/components/publish";
-import Guide from "@/components/guidex";
+import Guide from "@/components/guide";
 import Footer from "@/components/footer";
 
 // import { DM_Sans} from "next/font/google";
