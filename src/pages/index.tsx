@@ -12,7 +12,6 @@ import Footer from "@/components/footer";
 export default function Home() {
   return (
     <>
-      <Toaster richColors/>
     <main className="min-h-screen">
       <Tabs defaultValue="explore" className="w-full flex flex-col items-center p-5 md:p-10 md:px-24">
         <div className="flex flex-col items-center justify-center relative w-full">

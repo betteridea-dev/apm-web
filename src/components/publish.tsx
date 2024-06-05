@@ -6,6 +6,7 @@ import { toast } from "sonner"
 
 import { connect, createDataItemSigner } from "@permaweb/aoconnect"
 import { APM_ID } from "@/utils/ao-vars"
+import Link from "next/link"
 
 type Tag = {
     name: string,
@@ -127,7 +128,10 @@ export default function Publish() {
         tags.forEach((tag:Tag,_:number) => {
             console.log(tag.name, tag.value)
             if (tag.name == "Result" && tag.value == "success") {
-                toast.success("Package published successfully")
+                toast.success("Package published successfully. Opening package page")
+                setTimeout(() => {
+                    window.open(`/pkg?id=${m_id}`, "_blank")
+                }, 3000)
             }else if(tag.name == "Result" && tag.value == "error"){
                 toast.error("Error while publishing")
             }
@@ -147,6 +151,7 @@ export default function Publish() {
         <div className="flex flex-col gap-4">
             <TextInput placeholder="Package name" onChange={setPackageName} icon={<IdCardIcon width={25} height={25} />} />
             <TextInput placeholder="Vendor name (optional - default @apm)" onChange={setVendorName} icon={<PersonIcon width={25} height={25} />} />
+            <span className="text-sm -mt-4 -my-2 ml-6">To get a vendor name, <Link href="/new-vendor" className="text-[#68A04E]">visit this page</Link></span>
             <TextInput placeholder="Version (major.minor.patch - default 1.0.0)" onChange={setVersion} icon={<TimerIcon width={25} height={25} />} />
             <TextInput placeholder="Short Description" onChange={setShortDescription} icon={<InfoCircledIcon width={25} height={25} />} />
             <FileInput placeholder="Upload README.md" allow=".md" onChange={setReadme} icon={<FileTextIcon width={25} height={25} />} />

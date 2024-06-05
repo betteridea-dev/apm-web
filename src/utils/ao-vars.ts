@@ -18,4 +18,5 @@ export type Package = {
     Updated: number,
     Vendor: string,
     Version: string,
+    Versions?: {PkgID:string, Version:string}[]
 }
