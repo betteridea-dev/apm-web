@@ -80,7 +80,7 @@ export default function NewVendor() {
             <title>New Vendor | APM | BetterIDEa</title>
             <Tabs defaultValue="" value="" className="w-full flex flex-col items-center p-5 md:p-10 md:px-24">
                 <div className="flex flex-col items-center justify-center relative w-full">
-                    <Link href="/" className="md:absolute left-0 p-5 md:p-0 flex gap-3 items-center text-xl"><Image alt="logo" src={betterideaSVG} width={25} height={25} /> APM (beta)</Link>
+                    <Link href="/" className="md:absolute left-0 p-5 md:p-0 flex gap-3 items-center text-xl"><Image alt="logo" src={"/icon.svg"} width={35} height={35} /> APM (beta)</Link>
                     <Link href="/"><TabsList className="bg-[#EEEEEE] w-fit rounded-full h-fit">
                         <TabsTrigger value="explore" className="rounded-full p-3 px-4 data-[state=active]:bg-[#68A04E] data-[state=active]:text-white">Registry</TabsTrigger>
                         <TabsTrigger value="publish" className="rounded-full p-3 px-4 data-[state=active]:bg-[#68A04E] data-[state=active]:text-white">Publish Package</TabsTrigger>
