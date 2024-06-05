@@ -91,7 +91,7 @@ export default function PackageView() {
             { pkg?.Vendor&&( ["@apm"].includes(pkg?.Vendor as string)?"":`${pkg?.Vendor}/`)}{pkg?.Name ? pkg?.Name : "Loading..."}
         </div>
         <div className="md:ml-5">{pkg?.Description}</div>
-        <div className="md:ml-5">{pkg?.Version && `V${pkg?.Version}`}</div>
+        <div className="md:ml-5">{pkg?.Version && `V${pkg?.Version}`} - { pkg?.Installs} installs</div>
         <div className="md:ml-5 text-sm truncate md:text-base flex gap-2 items-center"><PersonIcon width={20} height={20} /> {pkg?.Owner && pkg?.Owner}</div>
         <div className="md:ml-5 text-sm truncate md:text-base flex gap-2 items-center"><IdCardIcon width={20} height={ 20} /> {pkg?.PkgID && pkg?.PkgID}</div>
         <hr className="my-3" />
@@ -138,7 +138,7 @@ export default function PackageView() {
                             endpoint += `@${v.Version}`
 
                             return <Link href={endpoint} key={i} className="p-4 font-mono bg-white rounded-[16px] text-sm md:text-base truncate">
-                                <div>{v.Version} - { v.PkgID}</div>
+                                <div>{v.Version} | {v.Installs} installs | <span className="text-xs">{v.PkgID}</span></div>
                             </Link>
                         })
                         }
