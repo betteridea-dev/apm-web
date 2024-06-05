@@ -2,7 +2,7 @@ import Markdown from "markdown-to-jsx";
 import Link from "next/link";
 
 export default function Guide() {
-    return <div>
+    return <div className="">
         <title>Guide | APM | BetterIDEa</title>
         <div className="mb-5"><span className="text-3xl font-bold p-5">Guide</span> for publishing packages</div>
         <div className="flex flex-col gap-4">
@@ -46,7 +46,7 @@ return M
             <div className="flex flex-col gap-2">
                 <div className="text-xl font-bold">Step 5: Install the package</div>
                 <div className="text-lg">You can install the package by running the following command in your project</div>
-                <div className="bg-[#EEEEEE] p-2 px-4 rounded-lg text-lg">
+                <div className="bg-[#EEEEEE] p-2 px-4 rounded-lg text-lg overflow-scroll">
                     <Markdown className="markdown">{`
 \`\`\`lua
 APM.install("@vendor_name/package_name@version_number_or_latest")

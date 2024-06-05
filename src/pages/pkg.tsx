@@ -138,7 +138,7 @@ export default function PackageView() {
                             if (pkg?.Name) endpoint += pkg?.Name
                             endpoint += `@${v.Version}`
 
-                            return <Link href={endpoint} key={i} className="p-4 font-mono bg-white rounded-[16px] text-sm md:text-base truncate">
+                            return <Link href={endpoint} key={i} className="p-4 font-mono bg-white rounded-[16px] text-sm md:text-base truncate overflow-scroll">
                                 <div>{v.Version} | {v.Installs} installs | <span className="text-xs">{v.PkgID}</span></div>
                             </Link>
                         })
