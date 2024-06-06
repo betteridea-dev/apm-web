@@ -5,7 +5,7 @@ import { Dispatch, SetStateAction, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { connect, createDataItemSigner } from "@permaweb/aoconnect"
-import { APM_ID } from "@/utils/ao-vars"
+import { APM_ID, Tag } from "@/utils/ao-vars"
 import { ReloadIcon } from "@radix-ui/react-icons"
 import Image    from "next/image"
 import betterideaSVG from "@/assets/betteridea.svg"
@@ -46,7 +46,10 @@ export default function NewVendor() {
         setRegistering(true)
         const m_id = await ao.message({
             process: APM_ID,
-            tags: [{ name: "Action", value: "RegisterVendor" }],
+            tags: [
+                { name: "Action", value: "APM.RegisterVendor" },
+                {name:"Quantity", value: "100000000000"}
+            ],
             data: JSON.stringify({ Name: vendorName }),
             signer: createDataItemSigner(window.arweaveWallet)
         })
@@ -58,20 +61,26 @@ export default function NewVendor() {
 
         setRegistering(false)
         console.log(res)
-        const { Messages, Output } = res
+        const { Messages } = res
+
         if (Messages.length == 0) {
-            toast.error(Output.data)
-        } else {
-            try {
-                console.log(Messages[0].Data)
-                toast.success(Messages[0].Data + ". Redirecting to homepage in 3")
-                setTimeout(() => {
-                    window.location.href = "/"
-                }, 3000)
-            }
-            catch (e) {
-                console.error(e)
-            }
+            const { Output } = res
+            if (Output.data) return toast.error(Output.data)
+        }
+
+        for (let i = 0; i < Messages.length; i++) {
+            const tags = Messages[i].Tags
+            tags.forEach((tag: Tag, _: number) => {
+                console.log(tag.name, tag.value)
+                if (tag.name == "Result" && tag.value == "success") {
+                    toast.success("Vendor registered. Redirecting to homepage")
+                    setTimeout(() => {
+                        window.location.href = "/"
+                    }, 3000)
+                } else if (tag.name == "Result" && tag.value == "error") {
+                    toast.error("Error while registering")
+                }
+            })
         }
     }
 
@@ -89,8 +98,8 @@ export default function NewVendor() {
                     </Link>
                 </div>
                 <div className="my-10 w-full h-full flex flex-col gap-5">
-                    <div className="text-3xl font-bold">
-                        New Vendor
+                    <div className="">
+                        <span className="text-3xl font-bold">New Vendor</span> <span className="mx-5 truncate">10 $TNEO required</span>
                     </div>
                     A vendor name allows you to publish packages under a common name (e.g. @betteridea/codecell). This name is unique and can't be changed once registered.
                         <TextInput placeholder="Vendor Name" icon="🏷️" onChange={setVendorName}/>

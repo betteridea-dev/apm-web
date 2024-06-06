@@ -17,7 +17,7 @@ export default function Guide() {
 local M = {}
 
 function M.hello()
-    print("Hello, world!")
+    return "Hello, world!"
 end
 
 return M
@@ -32,9 +32,11 @@ return M
                 <div className="text-lg">Default vendor name is '@apm' if you donot want to publish under a custom name and default version number is 1.0.0 if you are publishing for the first time</div>
                 <div className="text-lg">You can provide a custom version number (x.y.z) if you are updating an existing package</div>
                 <div className="text-lg">You can also provide a custom vendor name if you have registered one. To register a new vendor name, visit <Link href="/new-vendor" className="text-[#68a04e] font-bold">this page</Link></div>
+
             </div>
             <div className="flex flex-col gap-2">
                 <div className="text-xl font-bold">Step 3: Hit the publish button</div>
+                <div className="text-lg font-medium"><strong>10 Test NEO ($TNEO) tokens</strong> must be burnt to publish a new package or register a vendor name, after which <strong>1 $TNEO</strong> is burnt to publish future updates to existing packages.<br /> To get $TNEO, join our <Link href="https://discord.gg/nm6VKUQBrA" className="text-[#68a04e] font-bold">discord</Link> and tell us about the package you wish to publish.</div>
                 <div className="text-lg">The publisher will check for the input details and let you know if the package got published.</div>
                 <div className="text-lg">In case of any errors, you will have to fix your entered data.</div>
             </div>

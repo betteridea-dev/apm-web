@@ -84,7 +84,7 @@ export default function Registry() {
         setFetching(true)
         const res = await ao.dryrun({
             process: APM_ID,
-            tags: [{ name: "Action", value: "GetAllPackages" }],
+            tags: [{ name: "Action", value: "APM.GetAllPackages" }],
 
         })
         setFetching(false)
@@ -113,7 +113,7 @@ export default function Registry() {
             setFetching(true)
             const res = await ao.dryrun({
                 process: APM_ID,
-                tags: [{ name: "Action", value: "Search" }],
+                tags: [{ name: "Action", value: "APM.Search" }],
                 data:  searchQuery 
             })
             setFetching(false)

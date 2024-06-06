@@ -1,6 +1,6 @@
 
 
-export const APM_ID = "wZOOvryty7VbxVPU_KMd0ZwcpWMm-8-fwMQ0syu-w_k"
+export const APM_ID = "UdPDhw5S7pByV3pVqwyr1qzJ8mR8ktzi9olgsdsyZz4"
 
 export type Package = {
     Authors_: string[],
@@ -19,4 +19,9 @@ export type Package = {
     Vendor: string,
     Version: string,
     Versions?: {PkgID:string, Version:string, Installs:number}[]
+}
+
+export type Tag = {
+    name: string,
+    value: string
 }

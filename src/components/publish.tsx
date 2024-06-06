@@ -1,27 +1,23 @@
 import { useState, useEffect, Dispatch, SetStateAction } from "react"
 
-import { CodeIcon, FileIcon, FileTextIcon, IdCardIcon, InfoCircledIcon, Link1Icon, PersonIcon, TimerIcon, VercelLogoIcon } from "@radix-ui/react-icons"
+import { CodeIcon, FileIcon, FileTextIcon, IdCardIcon, InfoCircledIcon, Link1Icon, PersonIcon, ReloadIcon, TimerIcon, VercelLogoIcon } from "@radix-ui/react-icons"
 import { Button } from "./ui/button"
 import { toast } from "sonner"
 
 import { connect, createDataItemSigner } from "@permaweb/aoconnect"
-import { APM_ID } from "@/utils/ao-vars"
+import { APM_ID, Package, Tag } from "@/utils/ao-vars"
 import Link from "next/link"
 
-type Tag = {
-    name: string,
-    value: string
-}
 
-
-function TextInput({ placeholder, onChange, icon }: {
+function TextInput({defaultValue, placeholder, onChange, icon }: {
+    defaultValue:string,
     placeholder: string,
     onChange: Dispatch<SetStateAction<string>>,
     icon: React.ReactNode
 }) {
     return <div className="bg-[#EEE] p-3 rounded-[16px] flex gap-2 items-center">
         <div>{icon}</div>
-        <input className="outline-none w-full bg-transparent text-[#666]" placeholder={placeholder} onChange={(e) => onChange(e.target.value)} />
+        <input defaultValue={defaultValue} value={defaultValue} className="outline-none w-full bg-transparent text-[#666]" placeholder={placeholder} onChange={(e) => onChange(e.target.value)} />
     </div>
 }
 
@@ -55,6 +51,9 @@ export default function Publish() {
     const [main, setMain] = useState<string>("")
     const [repositoryUrl, setRepositoryUrl] = useState<string>("")
     const [address, setAddress] = useState<string>("")
+
+    const [publishing, setPublishing] = useState<boolean>(false)
+    const [toUpdate, setToUpdate] = useState<boolean>(false)
 
     const ao = connect()
 
@@ -103,10 +102,14 @@ export default function Publish() {
         //     data: JSON.stringify(data)
         // })
 
+        setPublishing(true)
         const m_id = await ao.message({
             process: APM_ID,
             data: JSON.stringify(data),
-            tags: [{ name: "Action", value: "Publish" }],
+            tags: [
+                { name: "Action", value: "APM.Publish" },
+                { name: "Quantity", value: toUpdate ?'10000000000': '100000000000'}
+            ],
             signer: createDataItemSigner(window.arweaveWallet)
         })
         console.log(m_id)
@@ -115,6 +118,7 @@ export default function Publish() {
             process: APM_ID,
             message: m_id
         })
+        setPublishing(false)
         console.log(res)
         const { Messages } = res
 
@@ -123,19 +127,51 @@ export default function Publish() {
             if(Output.data) return toast.error(Output.data)
         }
 
-        const tags = Messages[0].Tags
+        for (let i = 0; i < Messages.length; i++) {
+            const tags = Messages[i].Tags
+            tags.forEach((tag:Tag,_:number) => {
+                console.log(tag.name, tag.value)
+                if (tag.name == "Result" && tag.value == "success") {
+                    toast.success("Package published successfully. Opening package page")
+                    setTimeout(() => {
+                        window.open(`/pkg?id=${m_id}`, "_blank")
+                        }, 3000)
+                }else if(tag.name == "Result" && tag.value == "error"){
+                    toast.error("Error while publishing")
+                }
+            })
+        }
+    }
 
-        tags.forEach((tag:Tag,_:number) => {
-            console.log(tag.name, tag.value)
-            if (tag.name == "Result" && tag.value == "success") {
-                toast.success("Package published successfully. Opening package page")
-                setTimeout(() => {
-                    window.open(`/pkg?id=${m_id}`, "_blank")
-                }, 3000)
-            }else if(tag.name == "Result" && tag.value == "error"){
-                toast.error("Error while publishing")
-            }
+    async function loadDataIfAlreadyPublished() {
+        // check if package is already published
+        // if so, load the data
+        const res = await ao.dryrun({
+            process: APM_ID,
+            tags: [{ name: "Action", value: "APM.Info" }],
+            data: JSON.stringify({ Name: `${vendorName||"@apm"}/${packageName}`, }),
         })
+        // console.log(res)
+        const { Messages, Output } = res
+        console.log(Messages)
+        if (Messages.length == 0) {
+            // toast.error(Output.data)
+            setToUpdate(false)
+        } else {
+            try {
+                const data:Package = JSON.parse(Messages[0].Data)
+                if(address&&(data.Owner != address)) return toast.error("You are not the owner of this package")
+                toast.info("Package already exists. You can update it")
+                setToUpdate(true)
+                setShortDescription(data.Description)
+                setRepositoryUrl(data.RepositoryUrl)
+                setVendorName(data.Vendor)
+                setVersion(data.Version+" (increment to update)")
+            } catch (e) {
+                setToUpdate(false)
+                console.error(e)
+            }
+        }
     }
 
     async function connectWallet() {
@@ -145,21 +181,29 @@ export default function Publish() {
         toast.info(`Conencted to ${addr}`)
     }
 
+    useEffect(() => {
+        if (!packageName) return
+        sessionStorage.setItem("load-data-publish",JSON.stringify(setTimeout(() => {
+            loadDataIfAlreadyPublished()
+        }, 100)))
+        return () => clearTimeout(JSON.parse(sessionStorage.getItem("load-data-publish") as string))
+    }, [packageName, vendorName])
+
 
     return <div>
         <title>Publish | APM | BetterIDEa</title>
-        <div className="mb-5"><span className="text-xl font-bold p-5">Publish</span> Publish your own package</div>
+        <div className="mb-5"><span className="text-xl font-bold p-5">{toUpdate?"Update":"Publish"}</span> {toUpdate?"Update an existing package":"Publish your own package"} <span className="mx-5 truncate">(needs {toUpdate?"1":"10"} Test NEO)</span></div>
         <div className="flex flex-col gap-4">
-            <TextInput placeholder="Package name" onChange={setPackageName} icon={<IdCardIcon width={25} height={25} />} />
-            <TextInput placeholder="Vendor name (optional - default @apm)" onChange={setVendorName} icon={<PersonIcon width={25} height={25} />} />
+            <TextInput defaultValue={packageName} placeholder="Package name" onChange={setPackageName} icon={<IdCardIcon width={25} height={25} />} />
+            <TextInput defaultValue={vendorName} placeholder="Vendor name (optional - default @apm)" onChange={setVendorName} icon={<PersonIcon width={25} height={25} />} />
             <span className="text-sm -mt-4 -my-2 ml-6">To get a vendor name, <Link href="/new-vendor" className="text-[#68A04E]">visit this page</Link></span>
-            <TextInput placeholder="Version (major.minor.patch - default 1.0.0)" onChange={setVersion} icon={<TimerIcon width={25} height={25} />} />
-            <TextInput placeholder="Short Description" onChange={setShortDescription} icon={<InfoCircledIcon width={25} height={25} />} />
+            <TextInput defaultValue={version}  placeholder={toUpdate?"Please increment version number":"Version (major.minor.patch - default 1.0.0)"} onChange={setVersion} icon={<TimerIcon width={25} height={25} />} />
+            <TextInput defaultValue={shortDescription} placeholder="Short Description" onChange={setShortDescription} icon={<InfoCircledIcon width={25} height={25} />} />
             <FileInput placeholder="Upload README.md" allow=".md" onChange={setReadme} icon={<FileTextIcon width={25} height={25} />} />
             <FileInput placeholder="Upload main.lua" allow=".lua" onChange={setMain} icon={<CodeIcon width={25} height={25} />} />
-            <TextInput placeholder="Repository Url" onChange={setRepositoryUrl} icon={<Link1Icon width={25} height={25} />} />
+            <TextInput defaultValue={repositoryUrl} placeholder="Repository Url" onChange={setRepositoryUrl} icon={<Link1Icon width={25} height={25} />} />
             
-            {address ? <Button className="bg-[#666]" onClick={onPublishClicked}>Publish</Button> : <Button className="bg-[#666]" onClick={connectWallet}>Connect Wallet</Button>}
+            {address ? <Button className="bg-[#666]" disabled={publishing} onClick={onPublishClicked}> {publishing && <ReloadIcon className="animate-spin mr-2" />}{toUpdate ? "Update (1 $TNEO)" :"Publish (10 $TNEO)"}</Button> : <Button className="bg-[#666]" onClick={connectWallet}>Connect Wallet</Button>}
         </div>
     </div>
 }

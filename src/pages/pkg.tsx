@@ -62,7 +62,7 @@ export default function PackageView() {
 
             const res = await ao.dryrun({
                 process: APM_ID,
-                tags: [{ name: "Action", value: "Info" }],
+                tags: [{ name: "Action", value: "APM.Info" }],
                 data: JSON.stringify({ PkgID: id, Name: `${vendor}/${pkgname}`, Version: version }),
                 signer: createDataItemSigner(window.arweaveWallet)
             })
