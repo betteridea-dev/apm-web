@@ -80,11 +80,11 @@ export default function Registry() {
     const [titleVisible, setTitleVisible] = useState(true)
     const ao = connect()
 
-    async function getAllPackages() {
+    async function getPopular() {
         setFetching(true)
         const res = await ao.dryrun({
             process: APM_ID,
-            tags: [{ name: "Action", value: "APM.GetAllPackages" }],
+            tags: [{ name: "Action", value: "APM.GetPopular" }],
 
         })
         setFetching(false)
@@ -96,7 +96,7 @@ export default function Registry() {
         }
     }
 
-    useEffect(() => {getAllPackages()},[])
+    useEffect(() => {getPopular()},[])
 
 
     useEffect(() => {
@@ -107,7 +107,7 @@ export default function Registry() {
     },[searchDebouncer])
 
     useEffect(() => {
-        if (!searchQuery) {getAllPackages();return}
+        if (!searchQuery) {getPopular();return}
         console.log("Searching:", searchQuery)
         async function searchPackages() {
             setFetching(true)

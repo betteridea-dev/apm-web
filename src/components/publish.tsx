@@ -96,12 +96,6 @@ export default function Publish() {
         }
         console.log("publishing", data)
 
-        // const res =await ao.dryrun({
-        //     process: APM_ID,
-        //     tags: [{ name: "Action", value: "Publish" }],
-        //     data: JSON.stringify(data)
-        // })
-
         setPublishing(true)
         const m_id = await ao.message({
             process: APM_ID,
@@ -149,7 +143,7 @@ export default function Publish() {
         const res = await ao.dryrun({
             process: APM_ID,
             tags: [{ name: "Action", value: "APM.Info" }],
-            data: JSON.stringify({ Name: `${vendorName||"@apm"}/${packageName}`, }),
+            data: `${vendorName||"@apm"}/${packageName}`,
         })
         // console.log(res)
         const { Messages, Output } = res

@@ -50,7 +50,7 @@ export default function NewVendor() {
                 { name: "Action", value: "APM.RegisterVendor" },
                 {name:"Quantity", value: "100000000000"}
             ],
-            data: JSON.stringify({ Name: vendorName }),
+            data: vendorName,
             signer: createDataItemSigner(window.arweaveWallet)
         })
 
