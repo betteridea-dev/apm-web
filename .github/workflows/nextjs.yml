@@ -2,7 +2,7 @@
 #
 # To get started with Next.js see: https://nextjs.org/docs/getting-started
 #
-name: Deploy Next.js site to Pages
+name: Deploy Next.js site to Pages and Arweave permaweb using ardrive-cli
 
 on:
   # Runs on pushes targeting the default branch
@@ -52,7 +52,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          # cache: ${{ steps.detect-package-manager.outputs.manager }}
 
       - uses: pnpm/action-setup@v4
         name: Install pnpm
@@ -84,7 +83,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-
       - name: Install dependencies
-        # run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
         run: "pnpm install"
       - name: Build with Next.js
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
@@ -104,3 +102,37 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+      - name: Wallet64 to wallet file
+        uses: timheuer/base64-to-file@v1
+        id: wallet_file
+        with:
+          fileName: "wallet.json"
+          encodedString: ${{ secrets.WALLET64 }}
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          version: 8
+          run_install: false
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      - name: Install dependencies
+        run: "pnpm install"
+
+      - name: Install ArDrive CLI
+        run: |
+          npm i -g ardrive-cli
+      - name: 💾 Build and Publish to Arweave
+        id: publish_artifacts
+        run: |
+          npm run build:deploy
+        env:
+          WALLET_PATH: ${{ steps.wallet_file.outputs.filePath }}
+          ROOT_EID: ${{ secrets.ROOT_EID }}
+          TURBO: ${{ secrets.TURBO }}
+

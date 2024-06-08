@@ -2,11 +2,14 @@
   "name": "apm-web",
   "version": "0.1.0",
   "private": false,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "build:deploy": "npm run build && node deploy.js",
+    "deploy": "node deploy.js"
   },
   "dependencies": {
     "@next/third-parties": "^14.2.3",
@@ -19,6 +22,7 @@
     "@radix-ui/react-toast": "^1.1.5",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "dotenv": "^16.4.5",
     "markdown-to-jsx": "^7.4.7",
     "next": "14.2.3",
     "next-themes": "^0.3.0",
