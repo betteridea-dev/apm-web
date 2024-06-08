@@ -6,6 +6,7 @@ wallet.json
 manifest.json
 out.json
 create-folder-output.json
+cache
 
 # dependencies
 /node_modules
