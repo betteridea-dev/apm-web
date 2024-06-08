@@ -1,6 +1,6 @@
 import fs from 'fs'
 import dotenv from 'dotenv'
-import { execSync } from 'child_process';
+import { exec, execSync } from 'child_process';
 // import { WarpFactory, defaultCacheOptions } from "warp-contracts";
 // import Arweave from "arweave";
 
@@ -17,29 +17,46 @@ dotenv.config()
 // const contract = warp.contract(ANT).connect(jwk);
 
 
-// const _ = (err, stdout, stderr) => {
-//     if (err) {
-//         console.log(err)
-//         return
-//     }
-//     console.log(stdout)
-//     console.log(stderr)
-// }
+const foo = (err, stdout, stderr) => {
+    if (err) {
+        console.log(err)
+        return
+    }
+    console.log(stdout)
+    console.log(stderr)
+}
+
+execSync(`cp ${process.env.WALLET_PATH} ./wallet.json`)
 
 const timestampString = new Date().toString().replace(/:/g, "-").replace(/\./g, "-")
 console.log("Creating Folder...")
-execSync(`ardrive create-folder -w '${process.env.WALLET_PATH}' -n "${timestampString}" -F ${process.env.ROOT_EID} ${process.env.TURBO == "YES" && "--turbo"} > ./create-folder-output.json`)
+execSync(`ardrive create-folder -w ./wallet.json -n "${timestampString}" -F ${process.env.ROOT_EID} ${process.env.TURBO == "YES" && "--turbo"} > ./create-folder-output.json`)
 const createOutput = JSON.parse(fs.readFileSync('./create-folder-output.json'))
 const folderEid = createOutput.created[0].entityId
 console.log("Folder created with EID: " + folderEid)
 
-console.log(execSync('ls').toString())
-console.log(execSync('ls ./out').toString())
+console.log("Waiting for folder to sync...")
+execSync(`until ardrive folder-info \
+            --folder-id \
+            "${folderEid}"; do
+            echo "ArDrive folder has not yet synced. Sleeping for 2 seconds..."
+            sleep 2
+          done`,foo)
+
 console.log("Uploading...")
-execSync(`cd ./out && ardrive upload-file -w '${process.env.WALLET_PATH}' -l ./ -F "${folderEid}" ${process.env.TURBO == "YES" && "--turbo"}`)
+execSync(`cd ./out && ardrive upload-file -w ../wallet.json -l ./ -F "${folderEid}" ${process.env.TURBO == "YES" ? "--turbo":""}`)
+
+// console.log("Waiting for folder to sync...")
+// execSync(`until [[ $(ardrive list-folder \
+//             --parent-folder-id "${folderEid}" \
+//             | jq 'length') -gt 0 ]]; do
+//             echo "ArDrive folder artifacts have not yet synced. Sleeping for 2 seconds..."
+//             sleep 2
+//           done`,foo)
+execSync(`sleep 5`)
 
 console.log("Creating manifest...")
-execSync(`ardrive create-manifest -w '${process.env.WALLET_PATH}' -f ${folderEid} ${process.env.TURBO == "YES" && "--turbo"} --dry-run > manifest.json`)
+execSync(`ardrive create-manifest -w ./wallet.json -f '${folderEid}' ${process.env.TURBO == "YES" ? "--turbo" :""} --dry-run > manifest.json`)
 
 console.log("Modifying manifest...")
 const output = JSON.parse(fs.readFileSync('./manifest.json'))
@@ -59,7 +76,7 @@ console.log(manifest)
 fs.writeFileSync('./out/manifest.json', JSON.stringify(manifest, null, 2))
 
 console.log("Uploading manifest...")
-execSync(`cd ./out && ardrive upload-file -w "${process.env.WALLET_PATH}" -l ./manifest.json --content-type application/x.arweave-manifest+json -F ${folderEid} ${process.env.TURBO == "YES" && "--turbo"} > ../out.json`)
+execSync(`cd ./out && ardrive upload-file -w ../wallet.json -l ./manifest.json --content-type application/x.arweave-manifest+json -F ${folderEid} ${process.env.TURBO == "YES" ? "--turbo":""} > ../out.json`)
 
 const out = JSON.parse(fs.readFileSync('./out.json'))
 console.log(out)
