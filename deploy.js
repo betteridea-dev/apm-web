@@ -1,20 +1,24 @@
 import fs from 'fs'
 import dotenv from 'dotenv'
-import { exec, execSync } from 'child_process';
-// import { WarpFactory, defaultCacheOptions } from "warp-contracts";
-// import Arweave from "arweave";
+import {  execSync } from 'child_process';
+import { WarpFactory, defaultCacheOptions } from "warp-contracts";
+import Arweave from "arweave";
 
 dotenv.config()
 
-// const ANT = "Tox1YO--_IKNcd6S1RZ0RqmP-72XrmW4JEtqIVk410E"
-// const SUBDOMAIN = "gitar"
+const ANT = "aXJmbLDKLMTnmjyhvEcpML0nI1GZaNQVIGahTWX5mLw"
+const SUBDOMAIN = "apm"
 
-// const jwk = JSON.parse(Buffer.from(process.env.WALLET64, "base64").toString("utf-8"));
+const jwk = JSON.parse(Buffer.from(process.env.ANT_WALLET64, "base64").toString("utf-8"));
 // console.log(jwk)
-// const arweave = Arweave.init({ host: "arweave.net", port: 443, protocol: "https" });
-// const warp = WarpFactory.custom(arweave, defaultCacheOptions, "mainnet").useArweaveGateway().build();
+const arweave = Arweave.init({
+    host: "arweave.net",
+    port: 443,
+    protocol: "https",
+});
+const warp = WarpFactory.forMainnet(defaultCacheOptions, true, arweave);
 
-// const contract = warp.contract(ANT).connect(jwk);
+const contract = warp.contract(ANT).connect(jwk);
 
 
 const foo = (err, stdout, stderr) => {
@@ -35,13 +39,6 @@ const createOutput = JSON.parse(fs.readFileSync('./create-folder-output.json'))
 const folderEid = createOutput.created[0].entityId
 console.log("Folder created with EID: " + folderEid)
 
-// console.log("Waiting for folder to sync...")
-// execSync(`until ardrive folder-info \
-//             --folder-id \
-//             "${folderEid}"; do
-//             echo "ArDrive folder has not yet synced. Sleeping for 2 seconds..."
-//             sleep 2
-//           done`,foo)
 while (true) {
     try {
         execSync(`ardrive folder-info --folder-id "${folderEid}"`)
@@ -55,14 +52,7 @@ while (true) {
 console.log("Uploading...")
 execSync(`cd ./out && ardrive upload-file -w ../wallet.json -l ./ -F "${folderEid}" ${process.env.TURBO == "YES" ? "--turbo":""}`)
 
-// console.log("Waiting for folder to sync...")
-// execSync(`until [[ $(ardrive list-folder \
-//             --parent-folder-id "${folderEid}" \
-//             | jq 'length') -gt 0 ]]; do
-//             echo "ArDrive folder artifacts have not yet synced. Sleeping for 2 seconds..."
-//             sleep 2
-//           done`,foo)
-// execSync(`sleep 5`)
+
 while (JSON.parse(execSync(`ardrive list-folder --parent-folder-id "${folderEid}"`).toString()).length == 0) {
     console.log("ArDrive folder artifacts have not yet synced. Sleeping for 5 seconds...")
     execSync(`sleep 5`)
@@ -98,14 +88,15 @@ const dataTxnId = out.created[0].dataTxId
 console.log("deployed at https://arweave.net/" + dataTxnId)
 
 
-// // console.log("Updating ANT token...")
-// // contract.writeInteraction({
-// //     function: "setRecord",
-// //     subDomain: SUBDOMAIN,
-// //     transactionId: dataTxnId,
-// //     ttlSeconds: 3600
-// // }).then((tx) => {
-// //     console.log(tx.originalTxId)
-// // }).catch((err) => {
-// //     console.log(err)
-// // })
+console.log("Updating ANT token...")
+contract.writeInteraction({
+    function: "setRecord",
+    subDomain: SUBDOMAIN,
+    transactionId: dataTxnId,
+    ttlSeconds: 3600
+}).then((tx) => {
+    console.log("ANT token updated")
+    console.log(tx.originalTxId)
+}).catch((err) => {
+    console.log(err)
+})
