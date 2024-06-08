@@ -28,11 +28,13 @@ dotenv.config()
 
 const timestampString = new Date().toString().replace(/:/g, "-").replace(/\./g, "-")
 console.log("Creating Folder...")
-const createOutput = JSON.parse(execSync(`ardrive create-folder -w '${process.env.WALLET_PATH}' -n "${timestampString}" -F ${process.env.ROOT_EID} ${process.env.TURBO == "YES" && "--turbo > ./create-folder-output.json"}`).toString())
-// const createOutput = JSON.parse(fs.readFileSync('./create-folder-output.json'))
+execSync(`ardrive create-folder -w '${process.env.WALLET_PATH}' -n "${timestampString}" -F ${process.env.ROOT_EID} ${process.env.TURBO == "YES" && "--turbo"} > ./create-folder-output.json`)
+const createOutput = JSON.parse(fs.readFileSync('./create-folder-output.json'))
 const folderEid = createOutput.created[0].entityId
 console.log("Folder created with EID: " + folderEid)
 
+console.log(execSync('ls').toString())
+console.log(execSync('ls ./out').toString())
 console.log("Uploading...")
 execSync(`cd ./out && ardrive upload-file -w '${process.env.WALLET_PATH}' -l ./ -F "${folderEid}" ${process.env.TURBO == "YES" && "--turbo"}`)
 
