@@ -35,13 +35,22 @@ const createOutput = JSON.parse(fs.readFileSync('./create-folder-output.json'))
 const folderEid = createOutput.created[0].entityId
 console.log("Folder created with EID: " + folderEid)
 
-console.log("Waiting for folder to sync...")
-execSync(`until ardrive folder-info \
-            --folder-id \
-            "${folderEid}"; do
-            echo "ArDrive folder has not yet synced. Sleeping for 2 seconds..."
-            sleep 2
-          done`,foo)
+// console.log("Waiting for folder to sync...")
+// execSync(`until ardrive folder-info \
+//             --folder-id \
+//             "${folderEid}"; do
+//             echo "ArDrive folder has not yet synced. Sleeping for 2 seconds..."
+//             sleep 2
+//           done`,foo)
+while (true) {
+    try {
+        execSync(`ardrive folder-info --folder-id "${folderEid}"`)
+        break
+    } catch (err) {
+        console.log("ArDrive folder has not yet synced. Sleeping for 5 seconds...")
+        execSync(`sleep 5`)
+    }
+}
 
 console.log("Uploading...")
 execSync(`cd ./out && ardrive upload-file -w ../wallet.json -l ./ -F "${folderEid}" ${process.env.TURBO == "YES" ? "--turbo":""}`)
@@ -53,7 +62,11 @@ execSync(`cd ./out && ardrive upload-file -w ../wallet.json -l ./ -F "${folderEi
 //             echo "ArDrive folder artifacts have not yet synced. Sleeping for 2 seconds..."
 //             sleep 2
 //           done`,foo)
-execSync(`sleep 5`)
+// execSync(`sleep 5`)
+while (JSON.parse(execSync(`ardrive list-folder --parent-folder-id "${folderEid}"`).toString()).length == 0) {
+    console.log("ArDrive folder artifacts have not yet synced. Sleeping for 5 seconds...")
+    execSync(`sleep 5`)
+}
 
 console.log("Creating manifest...")
 execSync(`ardrive create-manifest -w ./wallet.json -f '${folderEid}' ${process.env.TURBO == "YES" ? "--turbo" :""} --dry-run > manifest.json`)
