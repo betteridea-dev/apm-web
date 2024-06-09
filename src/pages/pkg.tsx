@@ -176,7 +176,7 @@ export default function PackageView() {
                     </pre>
                     </TabsContent>
                 <TabsContent value="config" className="flex flex-col gap-1">
-                    <div>Last Updated: {pkg?.Updated}</div>
+                    <div>Last Updated: {new Date(pkg?.Updated as number).toString()}</div>
                     <div>DBID: {pkg?.ID}</div>
                     <div>PkgID: { pkg?.PkgID}</div>
                     <div>Version: {pkg?.Version}</div>

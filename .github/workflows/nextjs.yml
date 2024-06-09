@@ -90,6 +90,14 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./out
+      - name: push artifacts to build branch
+        uses: s0/git-publish-subdir-action@develop
+        env:
+          REPO: self
+          BRANCH: build
+          FOLDER: ./out
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MESSAGE: "push artifacts to build branch"
 
   # Deployment job
   deploy:
@@ -102,8 +110,64 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-      
-      
+
+  # pland_deploy:
+  #   environment:
+  #     name: github-pages
+  #   runs-on: ubuntu-latest
+  #   needs: build
+  #   steps:
+  #     - name: Checkout build branch
+  #       uses: actions/checkout@v4
+  #       with:
+  #         ref: build
+  #     - name: Wallet64 to wallet file
+  #       uses: timheuer/base64-to-file@v1
+  #       id: wallet_file
+  #       with:
+  #         fileName: "wallet.json"
+  #         encodedString: ${{ secrets.WALLET64 }}
+  #     - name: Setup Node
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: "20"
+  #     - name: "setup protocol land"
+  #         run: |
+  #           npm install --global @protocol.land/git-remote-helper
+  #           git config --add protocol.land.keyfile ${{ steps.wallet_file.outputs.filePath }}
+  #           npm install @protocol.land/pages --save-dev
+  #           git 
+  #     - name: "publish to pl-pages"
+  #         run: |
+  #           pl-pages -d .
+
+  # permabackup:
+  #       runs-on: ubuntu-latest
+  #       steps:
+  #           - name: 'Checkout repo (default branch)'
+  #             uses: actions/checkout@v3
+  #             # with:
+  #                 # fetch all history for all branches:
+  #                 # fetch-depth: 0
+  #                 # 
+  #           - name: 'Checkout all branches'
+  #             run: |
+  #                 default_branch=$(git branch | grep '*' | sed 's/\* //')
+  #                 for abranch in $(git branch -a | grep -v HEAD | grep remotes | sed "s/remotes\/origin\///g"); do git checkout $abranch ; done
+  #                 git checkout $default_branch
+  #                 git branch -a
+  #           - name: 'Setup node 18'
+  #             uses: actions/setup-node@v3
+  #             with:
+  #                 node-version: 18.x
+  #           - name: 'Sync repo to Protocol Land'
+  #             run: npx @protocol.land/sync@0.3.0
+  #             env:
+  #                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #                 REPO_TITLE: ${{ github.event.repository.name }}
+  #                 REPO_DESCRIPTION: ${{ github.event.repository.description }}
+  #                 WALLET: ${{ secrets.WALLET64 }}
+
       
   # permadeploy:
   #   environment:
