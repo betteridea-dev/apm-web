@@ -105,47 +105,47 @@ jobs:
       
       
       
-  permadeploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Wallet64 to wallet file
-        uses: timheuer/base64-to-file@v1
-        id: wallet_file
-        with:
-          fileName: "wallet.json"
-          encodedString: ${{ secrets.WALLET64 }}
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
-      - name: Checkout repo
-        uses: actions/checkout@v2    
-      - uses: pnpm/action-setup@v4
-        name: Install pnpm
-        with:
-          version: 8
-          run_install: false
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-      - name: Install dependencies
-        run: "pnpm install"
+  # permadeploy:
+  #   environment:
+  #     name: github-pages
+  #     url: ${{ steps.deployment.outputs.page_url }}
+  #   runs-on: ubuntu-latest
+  #   needs: build
+  #   steps:
+  #     - name: Wallet64 to wallet file
+  #       uses: timheuer/base64-to-file@v1
+  #       id: wallet_file
+  #       with:
+  #         fileName: "wallet.json"
+  #         encodedString: ${{ secrets.WALLET64 }}
+  #     - name: Setup Node
+  #       uses: actions/setup-node@v3
+  #       with:
+  #         node-version: 20
+  #     - name: Checkout repo
+  #       uses: actions/checkout@v2    
+  #     - uses: pnpm/action-setup@v4
+  #       name: Install pnpm
+  #       with:
+  #         version: 8
+  #         run_install: false
+  #     - name: Get pnpm store directory
+  #       shell: bash
+  #       run: |
+  #         echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+  #     - name: Install dependencies
+  #       run: "pnpm install"
 
-      - name: Install ArDrive CLI
-        run: |
-          pnpm i -g ardrive-cli
-      - name: 💾 Build and Publish to Arweave
-        id: publish_artifacts
-        run: |
-          pnpm run build:deploy
-        env:
-          WALLET_PATH: ${{ steps.wallet_file.outputs.filePath }}
-          ROOT_EID: ${{ secrets.ROOT_EID }}
-          TURBO: ${{ secrets.TURBO }}
-          ANT_WALLET64: ${{ secrets.ANT_WALLET64 }}
+  #     - name: Install ArDrive CLI
+  #       run: |
+  #         pnpm i -g ardrive-cli
+  #     - name: 💾 Build and Publish to Arweave
+  #       id: publish_artifacts
+  #       run: |
+  #         pnpm run build:deploy
+  #       env:
+  #         WALLET_PATH: ${{ steps.wallet_file.outputs.filePath }}
+  #         ROOT_EID: ${{ secrets.ROOT_EID }}
+  #         TURBO: ${{ secrets.TURBO }}
+  #         ANT_WALLET64: ${{ secrets.ANT_WALLET64 }}
 

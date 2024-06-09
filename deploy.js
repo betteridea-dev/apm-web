@@ -31,6 +31,7 @@ const foo = (err, stdout, stderr) => {
 }
 
 execSync(`cp ${process.env.WALLET_PATH} ./wallet.json`)
+execSync(`rm -rf ./out/manifest.json`)
 
 const timestampString = new Date().toString().replace(/:/g, "-").replace(/\./g, "-")
 console.log("Creating Folder...")
@@ -50,16 +51,36 @@ while (true) {
 }
 
 console.log("Uploading...")
-execSync(`cd ./out && ardrive upload-file -w ../wallet.json -l ./ -F "${folderEid}" ${process.env.TURBO == "YES" ? "--turbo":""}`)
+const uploadOutput = JSON.parse(execSync(`cd ./out && ardrive upload-file -w ../wallet.json --local-path ./ -F "${folderEid}" ${process.env.TURBO == "YES" ? "--turbo":""}`))
+const totalFiles = uploadOutput.created.length
+console.log(uploadOutput)
+console.log(`Uploaded ${totalFiles} files`)
+const childFolderEid = uploadOutput.created[0].entityId
 
+// while (true) {
+//     try {
+//         execSync(`ardrive folder-info --folder-id "${childFolderEid}"`)
+//         break
+//     } catch (err) {
+//         console.log("ArDrive folder has not yet synced. Sleeping for 5 seconds...")
+//         execSync(`sleep 5`)
+//     }
+// }
 
-while (JSON.parse(execSync(`ardrive list-folder --parent-folder-id "${folderEid}"`).toString()).length == 0) {
-    console.log("ArDrive folder artifacts have not yet synced. Sleeping for 5 seconds...")
-    execSync(`sleep 5`)
+while (true) {
+    const listedFiles = JSON.parse(execSync(`ardrive list-folder -F "${folderEid}"`).toString()).length
+    // if (listedFiles == totalFiles) {
+    if(listedFiles>0)
+        break
+    console.log(`ArDrive folder artifacts have not yet synced [${listedFiles}/${totalFiles}]. Sleeping for 5 seconds...`)
+execSync(`sleep 5`)
 }
+
 
 console.log("Creating manifest...")
 execSync(`ardrive create-manifest -w ./wallet.json -f '${folderEid}' ${process.env.TURBO == "YES" ? "--turbo" :""} --dry-run > manifest.json`)
+
+console.log("MANINFEST: ",fs.readFileSync('./manifest.json').toString())
 
 console.log("Modifying manifest...")
 const output = JSON.parse(fs.readFileSync('./manifest.json'))
