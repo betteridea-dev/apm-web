@@ -99,7 +99,7 @@ export default function NewVendor() {
                 </div>
                 <div className="my-10 w-full h-full flex flex-col gap-5">
                     <div className="">
-                        <span className="text-3xl font-bold">New Vendor</span> <span className="mx-5 truncate">10 $TNEO required</span>
+                        <span className="text-3xl font-bold">New Vendor</span> <span className="mx-5 truncate">10 $NEO required</span>
                     </div>
                     A vendor name allows you to publish packages under a common name (e.g. @betteridea/codecell). This name is unique and can't be changed once registered.
                         <TextInput placeholder="Vendor Name" icon="🏷️" onChange={setVendorName}/>

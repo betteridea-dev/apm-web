@@ -36,7 +36,7 @@ return M
             </div>
             <div className="flex flex-col gap-2">
                 <div className="text-xl font-bold">Step 3: Hit the publish button</div>
-                <div className="text-lg font-medium"><strong>10 Test NEO ($TNEO) tokens</strong> must be burnt to publish a new package or register a vendor name, after which <strong>1 $TNEO</strong> is burnt to publish future updates to existing packages.<br /> To get $TNEO, join our <Link href="https://discord.gg/nm6VKUQBrA" className="text-[#68a04e] font-bold">discord</Link> and tell us about the package you wish to publish.</div>
+                <div className="text-lg font-medium"><strong>10 NEO ($NEO) tokens</strong> must be burnt to publish a new package or register a vendor name, after which <strong>1 $NEO</strong> is burnt to publish future updates to existing packages.<br /> To get $NEO, join our <Link href="https://discord.gg/nm6VKUQBrA" className="text-[#68a04e] font-bold">discord</Link> and tell us about the package you wish to publish.</div>
                 <div className="text-lg">The publisher will check for the input details and let you know if the package got published.</div>
                 <div className="text-lg">In case of any errors, you will have to fix your entered data.</div>
             </div>

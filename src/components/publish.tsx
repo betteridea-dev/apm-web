@@ -186,7 +186,7 @@ export default function Publish() {
 
     return <div>
         <title>Publish | APM | BetterIDEa</title>
-        <div className="mb-5"><span className="text-xl font-bold p-5">{toUpdate?"Update":"Publish"}</span> {toUpdate?"Update an existing package":"Publish your own package"} <span className="mx-5 truncate">(needs {toUpdate?"1":"10"} Test NEO)</span></div>
+        <div className="mb-5"><span className="text-xl font-bold p-5">{toUpdate?"Update":"Publish"}</span> {toUpdate?"Update an existing package":"Publish your own package"} <span className="mx-5 truncate">(needs {toUpdate?"1":"10"} $NEO)</span></div>
         <div className="flex flex-col gap-4">
             <TextInput defaultValue={packageName} placeholder="Package name" onChange={setPackageName} icon={<IdCardIcon width={25} height={25} />} />
             <TextInput defaultValue={vendorName} placeholder="Vendor name (optional - default @apm)" onChange={setVendorName} icon={<PersonIcon width={25} height={25} />} />
@@ -197,7 +197,7 @@ export default function Publish() {
             <FileInput placeholder="Upload main.lua" allow=".lua" onChange={setMain} icon={<CodeIcon width={25} height={25} />} />
             <TextInput defaultValue={repositoryUrl} placeholder="Repository Url" onChange={setRepositoryUrl} icon={<Link1Icon width={25} height={25} />} />
             
-            {address ? <Button className="bg-[#666]" disabled={publishing} onClick={onPublishClicked}> {publishing && <ReloadIcon className="animate-spin mr-2" />}{toUpdate ? "Update (1 $TNEO)" :"Publish (10 $TNEO)"}</Button> : <Button className="bg-[#666]" onClick={connectWallet}>Connect Wallet</Button>}
+            {address ? <Button className="bg-[#666]" disabled={publishing} onClick={onPublishClicked}> {publishing && <ReloadIcon className="animate-spin mr-2" />}{toUpdate ? "Update (1 $NEO)" :"Publish (10 $NEO)"}</Button> : <Button className="bg-[#666]" onClick={connectWallet}>Connect Wallet</Button>}
         </div>
     </div>
 }
