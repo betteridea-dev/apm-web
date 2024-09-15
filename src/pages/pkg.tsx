@@ -1,5 +1,5 @@
 import { useRouter } from "next/router"
-import { useState,useEffect } from "react"
+import { useState, useEffect } from "react"
 import { connect, createDataItemSigner } from "@permaweb/aoconnect"
 import { APM_ID, Tag } from "@/utils/ao-vars"
 import { toast } from "sonner"
@@ -23,12 +23,12 @@ export default function PackageView() {
     const [transferAddress, setTransferAddress] = useState<string>("")
     const ao = connect()
     const router = useRouter()
-    const {id,name} = router.query
+    const { id, name } = router.query
 
 
     useEffect(() => {
         if (!(id || name)) return
-        console.log("Fetching package with ID or name:", id||name)
+        console.log("Fetching package with ID or name:", id || name)
 
         async function fetchPackage() {
             let vendor, pkgname, version
@@ -58,18 +58,18 @@ export default function PackageView() {
             }
             if (!vendor) vendor = "@apm"
             if (!vendor) setVendor("@apm")
-            if(!version) version = "latest"
-            if(!version) setVersion("latest")
+            if (!version) version = ""
+            if (!version) setVersion("")
 
             console.log(vendor, pkgname, version)
-            
+
 
 
             const res = await ao.dryrun({
                 process: APM_ID,
                 tags: [{ name: "Action", value: "APM.Info" }],
                 // data: JSON.stringify({ PkgID: id, Name: `${vendor}/${pkgname}`, Version: version }),
-                data: id ||name,
+                data: id || name,
                 signer: createDataItemSigner(window.arweaveWallet)
             })
             // return console.log(res)
@@ -89,7 +89,7 @@ export default function PackageView() {
         }
         fetchPackage()
     }, [id, name])
-    
+
     async function connectWallet() {
         await window.arweaveWallet?.connect(["SIGN_TRANSACTION", "ACCESS_ADDRESS"])
         const addr = await window.arweaveWallet?.getActiveAddress()
@@ -107,7 +107,7 @@ export default function PackageView() {
                 { name: "Action", value: "APM.Transfer" },
                 { name: "To", value: transferAddress }
             ],
-            data:`${pkg?.Vendor}/${pkg?.Name}`,
+            data: `${pkg?.Vendor}/${pkg?.Name}`,
             signer: createDataItemSigner(window.arweaveWallet)
         })
 
@@ -122,7 +122,7 @@ export default function PackageView() {
             const { Output } = res
             if (Output.data) return toast.error(Output.data)
         }
-        
+
         for (let i = 0; i < Messages.length; i++) {
             const tags = Messages[i].Tags
             tags.forEach((tag: Tag, _: number) => {
@@ -137,17 +137,17 @@ export default function PackageView() {
     }
 
     return <><div className="p-5 min-h-screen">
-        <title suppressHydrationWarning>{pkg?.Name ?`${pkg?.Vendor}/${pkg?.Name}`:"Loading..."} | APM | BetterIDEa</title>
+        <title suppressHydrationWarning>{pkg?.Name ? `${pkg?.Vendor}/${pkg?.Name}` : "Loading..."} | APM | BetterIDEa</title>
         <Link href="/" className="text-2xl p-5 flex gap-3 items-center"><Image width={35} height={35} alt="apm" src={"/icon.svg"} /> APM (beta)</Link>
-        <hr className="my-3"/>
+        <hr className="my-3" />
         <div className="text-3xl md:ml-5 font-bold flex items-center">
-            {pkg?.Vendor && (["@apm"].includes(pkg?.Vendor as string) ? "" : `${pkg?.Vendor}/`)}{pkg?.Name ? pkg?.Name : "Loading..."} 
-            <Link href={pkg?.RepositoryUrl || "#"}><GitHubLogoIcon width={28} height={28} className="mx-2" /></Link>
+            {pkg?.Vendor && (["@apm"].includes(pkg?.Vendor as string) ? "" : `${pkg?.Vendor}/`)}{pkg?.Name ? pkg?.Name : "Loading..."}
+            <Link href={pkg?.Repository || "#"}><GitHubLogoIcon width={28} height={28} className="mx-2" /></Link>
         </div>
         <div className="md:ml-5">{pkg?.Description}</div>
-        <div className="md:ml-5">{pkg?.Version && `V${pkg?.Version}`} - { pkg?.Installs} installs</div>
+        <div className="md:ml-5">{pkg?.Version && `V${pkg?.Version}`} - {pkg?.Installs} installs</div>
         <div className="md:ml-5 text-sm truncate md:text-base flex gap-2 items-center"><PersonIcon width={20} height={20} /> {pkg?.Owner && pkg?.Owner}</div>
-        <div className="md:ml-5 text-sm truncate md:text-base flex gap-2 items-center"><IdCardIcon width={20} height={ 20} /> {pkg?.PkgID && pkg?.PkgID}</div>
+        <div className="md:ml-5 text-sm truncate md:text-base flex gap-2 items-center"><IdCardIcon width={20} height={20} /> {pkg?.PkgID && pkg?.PkgID}</div>
         <hr className="my-3" />
         {/* tabview */}
         <Tabs defaultValue="readme" className="w-full flex flex-col items-center">
@@ -163,38 +163,38 @@ export default function PackageView() {
             </div>
             <div className="my-5 w-full h-full px-5 bg-[#eee] rounded-[16px] pb-2">
                 <TabsContent value="readme">
-                    <Markdown className="markdown overflow-scroll">{Buffer.from(pkg?.README||"", 'hex').toString()}</Markdown>
+                    <Markdown className="markdown overflow-scroll">{Buffer.from(pkg?.Readme || "", 'hex').toString()}</Markdown>
                 </TabsContent>
                 <TabsContent value="source">
                     <pre className=" overflow-scroll">
-                    <code>
-                            {function () { 
-                                if (pkg?.Items) return (JSON.parse(Buffer.from(pkg?.Items || "", 'hex').toString())[0].data)
+                        <code>
+                            {function () {
+                                if (pkg?.Source) return (Buffer.from(pkg?.Source || "", 'hex').toString())
                                 else return "..."
-                        }()}
+                            }()}
                         </code>
                     </pre>
-                    </TabsContent>
+                </TabsContent>
                 <TabsContent value="config" className="flex flex-col gap-1">
-                    <div>Last Updated: {new Date(pkg?.Updated as number).toString()}</div>
+                    <div>Last Updated: {new Date(pkg?.Timestamp as number).toString()}</div>
                     <div>DBID: {pkg?.ID}</div>
-                    <div>PkgID: { pkg?.PkgID}</div>
+                    <div>PkgID: {pkg?.PkgID}</div>
                     <div>Version: {pkg?.Version}</div>
                     <div>Total Installs (all versions): {
                         pkg?.Versions?.reduce((acc, v) => acc + v.Installs, 0)
                     }</div>
                     <div>Owner: {pkg?.Owner}</div>
-                    <div>Repository: <Link href={pkg?.RepositoryUrl || "#"}
+                    <div>Repository: <Link href={pkg?.Repository || "#"}
                         target="_blank"
-                        rel="noopener noreferrer" className="text-[#68A04E]">{pkg?.RepositoryUrl}</Link></div>
-                    
+                        rel="noopener noreferrer" className="text-[#68A04E]">{pkg?.Repository}</Link></div>
+
                     <div className="flex gap-2 my-1">
-                        <Input type="text" placeholder="Transfer to process or address" onChange={(e)=>setTransferAddress(e.target.value)} />
-                    {address?<Button onClick={transferOwnership}>Transfer Ownership</Button>:<Button onClick={connectWallet}>Connect Wallet</Button>}
+                        <Input type="text" placeholder="Transfer to process or address" onChange={(e) => setTransferAddress(e.target.value)} />
+                        {address ? <Button onClick={transferOwnership}>Transfer Ownership</Button> : <Button onClick={connectWallet}>Connect Wallet</Button>}
                     </div>
                 </TabsContent>
                 <TabsContent value="install">
-                    <div className="flex flex-col p-5">Installation command <code className="bg-white mt-3 p-3 rounded-[16px] pointer-events-auto">APM.install("{pkg?.Vendor == "@apm" ? "" : pkg?.Vendor + "/"}{pkg?.Name}{version && (version=="latest"?"":"@"+version )}")</code></div>
+                    <div className="flex flex-col p-5">Installation command <code className="bg-white mt-3 p-3 rounded-[16px] pointer-events-auto">APM.install("{pkg?.Vendor == "@apm" ? "" : pkg?.Vendor + "/"}{pkg?.Name}{version && (version == "latest" ? "" : "@" + version)}")</code></div>
                 </TabsContent>
                 <TabsContent value="versions" className="flex flex-col-reverse gap-2">
                     {
@@ -208,11 +208,11 @@ export default function PackageView() {
                                 <div>{v.Version} | {v.Installs} installs | <span className="text-xs">{v.PkgID}</span></div>
                             </Link>
                         })
-                        }
+                    }
                 </TabsContent>
             </div>
         </Tabs>
     </div>
-    <Footer/>
-    </>   
+        <Footer />
+    </>
 }

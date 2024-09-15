@@ -9,8 +9,8 @@ import { APM_ID, Package, Tag } from "@/utils/ao-vars"
 import Link from "next/link"
 
 
-function TextInput({defaultValue, placeholder, onChange, icon }: {
-    defaultValue:string,
+function TextInput({ defaultValue, placeholder, onChange, icon }: {
+    defaultValue: string,
     placeholder: string,
     onChange: Dispatch<SetStateAction<string>>,
     icon: React.ReactNode
@@ -102,7 +102,7 @@ export default function Publish() {
             data: JSON.stringify(data),
             tags: [
                 { name: "Action", value: "APM.Publish" },
-                { name: "Quantity", value: toUpdate ?'10000000000': '100000000000'}
+                { name: "Quantity", value: toUpdate ? '10000000000' : '100000000000' }
             ],
             signer: createDataItemSigner(window.arweaveWallet)
         })
@@ -118,19 +118,19 @@ export default function Publish() {
 
         if (Messages.length == 0) {
             const { Output } = res
-            if(Output.data) return toast.error(Output.data)
+            if (Output.data) return toast.error(Output.data)
         }
 
         for (let i = 0; i < Messages.length; i++) {
             const tags = Messages[i].Tags
-            tags.forEach((tag:Tag,_:number) => {
+            tags.forEach((tag: Tag, _: number) => {
                 console.log(tag.name, tag.value)
                 if (tag.name == "Result" && tag.value == "success") {
                     toast.success("Package published successfully. Opening package page")
                     setTimeout(() => {
                         window.open(`/pkg?id=${m_id}`, "_blank")
-                        }, 3000)
-                }else if(tag.name == "Result" && tag.value == "error"){
+                    }, 3000)
+                } else if (tag.name == "Result" && tag.value == "error") {
                     toast.error("Error while publishing")
                 }
             })
@@ -143,7 +143,7 @@ export default function Publish() {
         const res = await ao.dryrun({
             process: APM_ID,
             tags: [{ name: "Action", value: "APM.Info" }],
-            data: `${vendorName||"@apm"}/${packageName}`,
+            data: `${vendorName || "@apm"}/${packageName}`,
         })
         // console.log(res)
         const { Messages, Output } = res
@@ -153,14 +153,14 @@ export default function Publish() {
             setToUpdate(false)
         } else {
             try {
-                const data:Package = JSON.parse(Messages[0].Data)
-                if(address&&(data.Owner != address)) return toast.error("You are not the owner of this package")
+                const data: Package = JSON.parse(Messages[0].Data)
+                if (address && (data.Owner != address)) return toast.error("You are not the owner of this package")
                 toast.info("Package already exists. You can update it")
                 setToUpdate(true)
                 setShortDescription(data.Description)
-                setRepositoryUrl(data.RepositoryUrl)
+                setRepositoryUrl(data.Repository)
                 setVendorName(data.Vendor)
-                setVersion(data.Version+" (increment to update)")
+                setVersion(data.Version + " (increment to update)")
             } catch (e) {
                 setToUpdate(false)
                 console.error(e)
@@ -177,27 +177,28 @@ export default function Publish() {
 
     useEffect(() => {
         if (!packageName) return
-        sessionStorage.setItem("load-data-publish",JSON.stringify(setTimeout(() => {
+        sessionStorage.setItem("load-data-publish", JSON.stringify(setTimeout(() => {
             loadDataIfAlreadyPublished()
         }, 100)))
         return () => clearTimeout(JSON.parse(sessionStorage.getItem("load-data-publish") as string))
     }, [packageName, vendorName])
 
+    return <div>under construction. Please see <Link href="https://www.npmjs.com/package/apm-tool" className=" underline">APM CLI TOOL</Link></div>
 
     return <div>
         <title>Publish | APM | BetterIDEa</title>
-        <div className="mb-5"><span className="text-xl font-bold p-5">{toUpdate?"Update":"Publish"}</span> {toUpdate?"Update an existing package":"Publish your own package"} <span className="mx-5 truncate">(needs {toUpdate?"1":"10"} $NEO)</span></div>
+        <div className="mb-5"><span className="text-xl font-bold p-5">{toUpdate ? "Update" : "Publish"}</span> {toUpdate ? "Update an existing package" : "Publish your own package"} <span className="mx-5 truncate">(needs {toUpdate ? "1" : "10"} $NEO)</span></div>
         <div className="flex flex-col gap-4">
             <TextInput defaultValue={packageName} placeholder="Package name" onChange={setPackageName} icon={<IdCardIcon width={25} height={25} />} />
             <TextInput defaultValue={vendorName} placeholder="Vendor name (optional - default @apm)" onChange={setVendorName} icon={<PersonIcon width={25} height={25} />} />
             <span className="text-sm -mt-4 -my-2 ml-6">To get a vendor name, <Link href="/new-vendor" className="text-[#68A04E]">visit this page</Link></span>
-            <TextInput defaultValue={version}  placeholder={toUpdate?"Please increment version number":"Version (major.minor.patch - default 1.0.0)"} onChange={setVersion} icon={<TimerIcon width={25} height={25} />} />
+            <TextInput defaultValue={version} placeholder={toUpdate ? "Please increment version number" : "Version (major.minor.patch - default 1.0.0)"} onChange={setVersion} icon={<TimerIcon width={25} height={25} />} />
             <TextInput defaultValue={shortDescription} placeholder="Short Description" onChange={setShortDescription} icon={<InfoCircledIcon width={25} height={25} />} />
             <FileInput placeholder="Upload README.md" allow=".md" onChange={setReadme} icon={<FileTextIcon width={25} height={25} />} />
             <FileInput placeholder="Upload main.lua" allow=".lua" onChange={setMain} icon={<CodeIcon width={25} height={25} />} />
             <TextInput defaultValue={repositoryUrl} placeholder="Repository Url" onChange={setRepositoryUrl} icon={<Link1Icon width={25} height={25} />} />
-            
-            {address ? <Button className="bg-[#666]" disabled={publishing} onClick={onPublishClicked}> {publishing && <ReloadIcon className="animate-spin mr-2" />}{toUpdate ? "Update (1 $NEO)" :"Publish (10 $NEO)"}</Button> : <Button className="bg-[#666]" onClick={connectWallet}>Connect Wallet</Button>}
+
+            {address ? <Button className="bg-[#666]" disabled={publishing} onClick={onPublishClicked}> {publishing && <ReloadIcon className="animate-spin mr-2" />}{toUpdate ? "Update (1 $NEO)" : "Publish (10 $NEO)"}</Button> : <Button className="bg-[#666]" onClick={connectWallet}>Connect Wallet</Button>}
         </div>
     </div>
 }

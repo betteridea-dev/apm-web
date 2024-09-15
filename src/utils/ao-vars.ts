@@ -1,24 +1,25 @@
 
 
-export const APM_ID = "UdPDhw5S7pByV3pVqwyr1qzJ8mR8ktzi9olgsdsyZz4"
+export const APM_ID = "DKF8oXtPvh3q8s0fJFIeHFyHNM6oKrwMCUrPxEMroak"
 
 export type Package = {
-    Authors_: string[],
-    Dependencies: string[],
+    Authors_: { name: string, email: string, url: string, address: string }[],
+    Dependencies: { [key: string]: { version: string } },
     Description: string,
     ID: number,
     Installs: number,
-    Items: string,
-    Main: string,
+    TotalInstalls: number,
+    Source: string,
+    // Main: string,
     Name: string,
     Owner: string,
     PkgID: string,
-    README: string,
-    RepositoryUrl: string,
-    Updated: number,
+    Readme: string,
+    Repository: string,
+    Timestamp: number,
     Vendor: string,
     Version: string,
-    Versions?: {PkgID:string, Version:string, Installs:number}[]
+    Versions?: { PkgID: string, Version: string, Installs: number }[]
 }
 
 export type Tag = {
