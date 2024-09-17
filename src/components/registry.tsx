@@ -21,6 +21,7 @@ import Markdown from "markdown-to-jsx"
 import betterideaSVG from "@/assets/betteridea.svg"
 import npmSVG from "@/assets/npm.svg"
 import { Package } from "@/utils/ao-vars"
+import { useLocalStorage } from "usehooks-ts"
 
 function ExploreItem({ title, description, link, icon }: { title: string, description: string, link: string, icon?: React.ReactNode }) {
     return <Link href={link} target="_blank"
@@ -43,7 +44,7 @@ function PackageItem({ data, setTitleVisible }: { data: Package, setTitleVisible
 
     return <Drawer onOpenChange={openChange}>
         <DrawerTrigger className="bg-[#eee] p-6 px-7 rounded-[16px] ring-1 ring-[#e7e7e7] cursor-pointer">
-            <div className="w-full flex justify-between"><span className="font-semibold text-[18px]">{title}</span> <span className="text-[#626262] text-sm">{data.Installs} installs</span></div>
+            <div className="w-full flex justify-between"><span className="font-semibold text-[18px]">{title}</span> <span className="text-[#626262] text-sm">{data.TotalInstalls} installs</span></div>
             <div className="w-full flex justify-between items-end"><div className="text-[16px] text-left">{data.Description}</div> <span className="text-sm text-[#626262]">V{data.Version}</span></div>
         </DrawerTrigger>
         <DrawerContent className="md:px-7">
@@ -76,7 +77,7 @@ export default function Registry() {
     const [fetching, setFetching] = useState(false)
     const [searchDebouncer, setSearchDebouncer] = useState<string>("")
     const [searchQuery, setSearchQuery] = useState<string>("")
-    const [packages, setPackages] = useState<Package[]>([])
+    const [packages, setPackages] = useLocalStorage<Package[]>("packages", [], { initializeWithValue: true })
     const [titleVisible, setTitleVisible] = useState(true)
     const ao = connect()
 
@@ -141,14 +142,15 @@ export default function Registry() {
             </div>
             <div className="flex flex-col gap-3 overflow-scroll py-1 px-0.5 rounded-[16px]">
                 {
-                    fetching ? <>
+                    fetching && <>
                         <div className="space-y-2">
                             <Skeleton className="h-4 w-[100%]" />
                             <Skeleton className="h-4 w-[90%]" />
                         </div>
-                    </> : packages.length > 0 ? packages.map((pkg, i) => {
-                        return <PackageItem setTitleVisible={setTitleVisible} data={pkg} key={i} />
-                    }) : "No Packages Found"
+                    </>}
+                {packages.length > 0 ? packages.map((pkg, i) => {
+                    return <PackageItem setTitleVisible={setTitleVisible} data={pkg} key={i} />
+                }) : "No Packages Found"
                 }
                 {/* <PackageItem title="@betteridea/testpkg - 1.0.1" description="This is dummy description for a package registered on APM" installs={72} />
                 <PackageItem title="testpkg" description="This is dummy description for a package registered on APM" installs={72} /> */}

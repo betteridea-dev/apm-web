@@ -176,13 +176,11 @@ export default function PackageView() {
                     </pre>
                 </TabsContent>
                 <TabsContent value="config" className="flex flex-col gap-1">
-                    <div>Last Updated: {new Date(pkg?.Timestamp as number).toString()}</div>
+                    <div>Published: {new Date(pkg?.Timestamp as number).toString()}</div>
                     <div>DBID: {pkg?.ID}</div>
                     <div>PkgID: {pkg?.PkgID}</div>
                     <div>Version: {pkg?.Version}</div>
-                    <div>Total Installs (all versions): {
-                        pkg?.Versions?.reduce((acc, v) => acc + v.Installs, 0)
-                    }</div>
+                    <div>Total Installs (all versions): {pkg?.TotalInstalls}</div>
                     <div>Owner: {pkg?.Owner}</div>
                     <div>Repository: <Link href={pkg?.Repository || "#"}
                         target="_blank"
