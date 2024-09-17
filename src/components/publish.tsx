@@ -5,9 +5,10 @@ import { Button } from "./ui/button"
 import { toast } from "sonner"
 
 import { connect, createDataItemSigner } from "@permaweb/aoconnect"
-import { APM_ID, Package, Tag } from "@/utils/ao-vars"
+import { Package, Tag } from "@/utils/ao-vars"
 import Link from "next/link"
 
+const APM_ID = "UdPDhw5S7pByV3pVqwyr1qzJ8mR8ktzi9olgsdsyZz4"
 
 function TextInput({ defaultValue, placeholder, onChange, icon }: {
     defaultValue: string,
@@ -43,6 +44,13 @@ function FileInput({ placeholder, onChange, icon, allow }: {
 }
 
 export default function Publish() {
+
+
+    return <div>Under Construction. <br />Please see Guide & <Link href="https://www.npmjs.com/package/apm-tool" className=" underline">APM CLI TOOL</Link></div>
+
+}
+
+export function PublishOld() {
     const [packageName, setPackageName] = useState<string>("")
     const [vendorName, setVendorName] = useState<string>("")
     const [version, setVersion] = useState<string>("")
@@ -182,8 +190,6 @@ export default function Publish() {
         }, 100)))
         return () => clearTimeout(JSON.parse(sessionStorage.getItem("load-data-publish") as string))
     }, [packageName, vendorName])
-
-    return <div>Under Construction. <br />Please see Guide & <Link href="https://www.npmjs.com/package/apm-tool" className=" underline">APM CLI TOOL</Link></div>
 
     return <div>
         <title>Publish | APM | BetterIDEa</title>
