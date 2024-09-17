@@ -7,7 +7,7 @@ import { toast } from "sonner"
 import { connect, createDataItemSigner } from "@permaweb/aoconnect"
 import { APM_ID, Tag } from "@/utils/ao-vars"
 import { ReloadIcon } from "@radix-ui/react-icons"
-import Image    from "next/image"
+import Image from "next/image"
 import betterideaSVG from "@/assets/betteridea.svg"
 
 function TextInput({ placeholder, onChange, icon }: {
@@ -38,9 +38,9 @@ export default function NewVendor() {
         //checks
         if (!vendorName) return toast.error("Vendor name is required")
         if (!vendorName.match(/^@[a-z]+$/i)) return toast.error("Vendor name should only contain alphabetical characters, and must start with @")
-        if (vendorName.length <4) return toast.error("Vendor name should be atleast 3 characters long")
-        if(vendorName.length > 20) return toast.error("Vendor name should be less than 20 characters long")
-        
+        if (vendorName.length < 4) return toast.error("Vendor name should be atleast 3 characters long")
+        if (vendorName.length > 20) return toast.error("Vendor name should be less than 20 characters long")
+
         const ao = connect()
 
         setRegistering(true)
@@ -48,7 +48,7 @@ export default function NewVendor() {
             process: APM_ID,
             tags: [
                 { name: "Action", value: "APM.RegisterVendor" },
-                {name:"Quantity", value: "100000000000"}
+                { name: "Quantity", value: "100000000000" }
             ],
             data: vendorName,
             signer: createDataItemSigner(window.arweaveWallet)
@@ -89,7 +89,7 @@ export default function NewVendor() {
             <title>New Vendor | APM | BetterIDEa</title>
             <Tabs defaultValue="" value="" className="w-full flex flex-col items-center p-5 md:p-10 md:px-24">
                 <div className="flex flex-col items-center justify-center relative w-full">
-                    <Link href="/" className="md:absolute left-0 p-5 md:p-0 flex gap-3 items-center text-xl"><Image alt="logo" src={"/icon.svg"} width={35} height={35} /> APM (beta)</Link>
+                    <Link href="/" className="md:absolute left-0 p-5 md:p-0 flex gap-3 items-center text-xl"><Image alt="logo" src={"/icon.svg"} width={35} height={35} /> APM</Link>
                     <Link href="/"><TabsList className="bg-[#EEEEEE] w-fit rounded-full h-fit">
                         <TabsTrigger value="explore" className="rounded-full p-3 px-4 data-[state=active]:bg-[#68A04E] data-[state=active]:text-white">Registry</TabsTrigger>
                         <TabsTrigger value="publish" className="rounded-full p-3 px-4 data-[state=active]:bg-[#68A04E] data-[state=active]:text-white">Publish Package</TabsTrigger>
@@ -102,7 +102,7 @@ export default function NewVendor() {
                         <span className="text-3xl font-bold">New Vendor</span> <span className="mx-5 truncate">10 $NEO required</span>
                     </div>
                     A vendor name allows you to publish packages under a common name (e.g. @betteridea/codecell). This name is unique and can't be changed once registered.
-                        <TextInput placeholder="Vendor Name" icon="🏷️" onChange={setVendorName}/>
+                    <TextInput placeholder="Vendor Name" icon="🏷️" onChange={setVendorName} />
                     {address ? <Button disabled={registering} className="bg-[#666]" onClick={onRegister}>{registering && <ReloadIcon className="animate-spin mr-2" />} Register Vendor</Button> : <Button className="bg-[#666]" onClick={connectWallet}>Connect Wallet</Button>}
                 </div>
             </Tabs>

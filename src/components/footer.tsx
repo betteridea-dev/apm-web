@@ -8,8 +8,9 @@ import permanentSVG from "@/assets/permanent.svg";
 export default function Footer() {
     return <footer className="bg-[#68A04E] p-10 text-white flex flex-col gap-5 justify-center md:flex-row md:justify-between items-center">
         <div>
-            <Link href="https://discord.gg/nm6VKUQBrA" target="_blank" className="flex items-center">
-                <DiscordLogoIcon className="w-8 h-8 mr-2" />
+            <Link href="https://betteridea.dev" target="_blank" className="flex items-center">
+                {/* <DiscordLogoIcon className="w-8 h-8 mr-2" /> */}
+                <Image src={`https://betteridea.dev/logo.png`} alt="betteridea" className="w-10 h-10" width={100} height={100} />
                 Made with ❤️ by BetterIDEa
             </Link>
         </div>

@@ -149,7 +149,11 @@ export default function Registry() {
                         </div>
                     </>}
                 {packages.length > 0 ? packages.map((pkg, i) => {
-                    return <PackageItem setTitleVisible={setTitleVisible} data={pkg} key={i} />
+                    if (!searchDebouncer) return <PackageItem setTitleVisible={setTitleVisible} data={pkg} key={i} />
+                    else {
+                        if (pkg.Name.toLowerCase().includes(searchDebouncer.toLowerCase()) || pkg.Vendor.toLowerCase().includes(searchDebouncer.toLowerCase())) return <PackageItem setTitleVisible={setTitleVisible} data={pkg} key={i} />
+
+                    }
                 }) : "No Packages Found"
                 }
                 {/* <PackageItem title="@betteridea/testpkg - 1.0.1" description="This is dummy description for a package registered on APM" installs={72} />

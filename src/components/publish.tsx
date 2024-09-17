@@ -183,7 +183,7 @@ export default function Publish() {
         return () => clearTimeout(JSON.parse(sessionStorage.getItem("load-data-publish") as string))
     }, [packageName, vendorName])
 
-    return <div>under construction. Please see <Link href="https://www.npmjs.com/package/apm-tool" className=" underline">APM CLI TOOL</Link></div>
+    return <div>Under Construction. <br />Please see Guide & <Link href="https://www.npmjs.com/package/apm-tool" className=" underline">APM CLI TOOL</Link></div>
 
     return <div>
         <title>Publish | APM | BetterIDEa</title>

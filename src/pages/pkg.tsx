@@ -138,7 +138,7 @@ export default function PackageView() {
 
     return <><div className="p-5 min-h-screen">
         <title suppressHydrationWarning>{pkg?.Name ? `${pkg?.Vendor}/${pkg?.Name}` : "Loading..."} | APM | BetterIDEa</title>
-        <Link href="/" className="text-2xl p-5 flex gap-3 items-center"><Image width={35} height={35} alt="apm" src={"/icon.svg"} /> APM (beta)</Link>
+        <Link href="/" className="text-2xl p-5 flex gap-3 items-center"><Image width={35} height={35} alt="apm" src={"/icon.svg"} /> APM</Link>
         <hr className="my-3" />
         <div className="text-3xl md:ml-5 font-bold flex items-center">
             {pkg?.Vendor && (["@apm"].includes(pkg?.Vendor as string) ? "" : `${pkg?.Vendor}/`)}{pkg?.Name ? pkg?.Name : "Loading..."}
