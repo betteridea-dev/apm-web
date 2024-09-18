@@ -12,7 +12,7 @@ import Link from "next/link";
 export default function Home() {
   return (
     <>
-      <main className="min-h-screen">
+      <main className="min-h-screen !bg-white">
         <Tabs defaultValue="explore" className="w-full flex flex-col items-center p-5 md:p-10 md:px-24">
           <div className="flex flex-col items-center justify-center relative w-full">
             <Link href="/" className="md:absolute left-0 p-5 md:p-0 flex gap-3 items-center text-xl"><Image alt="logo" src={"/icon.svg"} width={35} height={35} /> APM</Link>

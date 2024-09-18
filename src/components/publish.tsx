@@ -46,7 +46,7 @@ function FileInput({ placeholder, onChange, icon, allow }: {
 export default function Publish() {
 
 
-    return <div>Under Construction. <br />Please see Guide & <Link href="https://www.npmjs.com/package/apm-tool" className=" underline">APM CLI TOOL</Link></div>
+    return <div>Under Construction. <br />Please see Guide & <Link href="https://www.npmjs.com/package/apm-tool" target="_blank" className=" underline">APM CLI TOOL</Link></div>
 
 }
 

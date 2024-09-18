@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/drawer"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { toast } from "sonner"
-import { GitHubLogoIcon, IdCardIcon, InfoCircledIcon, MagnifyingGlassIcon, PersonIcon } from "@radix-ui/react-icons"
+import { GitHubLogoIcon, IdCardIcon, InfoCircledIcon, MagnifyingGlassIcon, PersonIcon, TwitterLogoIcon, DiscordLogoIcon } from "@radix-ui/react-icons"
 import { connect } from "@permaweb/aoconnect"
 import { APM_ID } from "@/utils/ao-vars"
 import Markdown from "markdown-to-jsx"
@@ -171,6 +171,11 @@ export default function Registry() {
                 <ExploreItem title="Portable Codecells" description="Node package to easily add LUA codecells to webapps" link="https://www.npmjs.com/package/@betteridea/codecell" icon={<Image src={npmSVG} width={16} height={16} alt="codecells" />} />
                 {/* <ExploreItem title="LearnAO" description="Learn all about building on AO by actually building on AO" link="https://learn.betteridea.dev" icon={<Image src={learnSVG} width={16} height={16} alt="learn-logo" />} /> */}
 
+                <div className="flex justify-evenly">
+                    <Link href="https://twitter.com/betteridea_dev" target="_blank" className="bg-[#1DA1F2] p-3 rounded-[16px] text-white hover:scale-105 hover:shadow-lg transition-all duration-200"><TwitterLogoIcon width={25} height={25} /></Link>
+                    <Link href="https://discord.gg/nm6VKUQBrA" target="_blank" className="bg-[#7289DA] p-3 rounded-[16px] text-white hover:scale-105 hover:shadow-lg transition-all duration-200"><DiscordLogoIcon width={25} height={25} /></Link>
+                    <Link href="https://github.com/betteridea-dev" target="_blank" className="bg-[#333] p-3 rounded-[16px] text-white hover:scale-105 hover:shadow-lg transition-all duration-200"> <GitHubLogoIcon width={25} height={25} /></Link>
+                </div>
             </div>
         </div>
     </div>
