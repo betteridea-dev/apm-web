@@ -62,7 +62,7 @@ function PackageItem({ data, setTitleVisible }: { data: Package, setTitleVisible
             <DrawerFooter>
                 <div className="flex flex-col min-w-[28vw] gap-2">
                     <div>{data.Installs} installs for V{data.Version}</div>
-                    <div className="bg-[#eee] rounded-[16px] p-3 px-5 flex flex-col">Installation command <code className="bg-white mt-3 p-3 rounded-[16px] pointer-events-auto">APM.install("{title}")</code></div>
+                    <div className="bg-[#eee] rounded-[16px] p-3 px-5 flex flex-col">Installation command <code className="bg-white mt-3 p-3 rounded-[16px] pointer-events-auto">apm.install "{title}"</code></div>
                     <div className="flex gap-2 justify-center">
                         <Link href={`/pkg?id=${data.Vendor + "/" + data.Name}`} className="bg-[#68A04E] flex justify-between pr-4 gap-4 text-white p-3 rounded-[16px]">More details <InfoCircledIcon width={25} height={25} /></Link>
                         <Link href={data.Repository || "#"} target="_blank" className="bg-[#68A04E] flex justify-between pr-4 gap-4 text-white p-3 rounded-[16px]">View on GitHub <GitHubLogoIcon width={25} height={25} /></Link>

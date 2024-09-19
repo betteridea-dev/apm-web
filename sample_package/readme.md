@@ -7,7 +7,7 @@ This is a sample package for the APM (AO Package Manager)
 ## Installation
 
 ```bash
-APM.install("sample_package")
+apm.install "sample_package"
 ```
 
 ## Usage

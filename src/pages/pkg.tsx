@@ -192,7 +192,7 @@ export default function PackageView() {
                     </div>
                 </TabsContent>
                 <TabsContent value="install">
-                    <div className="flex flex-col p-5">Installation command <code className="bg-white mt-3 p-3 rounded-[16px] pointer-events-auto">APM.install("{pkg?.Vendor == "@apm" ? "" : pkg?.Vendor + "/"}{pkg?.Name}{version && (version == "latest" ? "" : "@" + version)}")</code></div>
+                    <div className="flex flex-col p-5">Installation command <code className="bg-white mt-3 p-3 rounded-[16px] pointer-events-auto">apm.install "{pkg?.Vendor == "@apm" ? "" : pkg?.Vendor + "/"}{pkg?.Name}{version && (version == "latest" ? "" : "@" + version)}"</code></div>
                 </TabsContent>
                 <TabsContent value="versions" className="flex flex-col-reverse gap-2">
                     {
