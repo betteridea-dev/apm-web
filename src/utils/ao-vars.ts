@@ -1,10 +1,12 @@
 
 
-export const APM_ID = "DKF8oXtPvh3q8s0fJFIeHFyHNM6oKrwMCUrPxEMroak"
+export const APM_ID = "RLvG3tclmALLBCrwc17NqzNFqZCrUf3-RKZ5v8VRHiU"
 
 export type Package = {
-    Authors_: { name: string, email: string, url: string, address: string }[],
-    Dependencies: { [key: string]: { version: string } },
+    // Some fields returned by the backend can be JSON strings; support unions
+    Authors_?: { name: string, email: string, url: string, address: string }[],
+    Authors?: { name: string, email: string, url: string, address: string }[] | string,
+    Dependencies: { [key: string]: { version: string } } | string,
     Description: string,
     ID: number,
     Installs: number,
@@ -16,6 +18,9 @@ export type Package = {
     PkgID: string,
     Readme: string,
     Repository: string,
+    Keywords?: string[] | string,
+    License?: string,
+    Warnings?: { modifiesGlobalState?: boolean, installMessage?: string } | string,
     Timestamp: number,
     Vendor: string,
     Version: string,

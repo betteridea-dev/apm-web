@@ -8,9 +8,9 @@ export default function Guide() {
         <div className="flex flex-col gap-10 py-10">
             <div className="flex flex-col gap-2">
                 <div className="text-xl font-bold">Step 1: Install APM CLI TOOL</div>
-                <Markdown className="markdown bg-zinc-100 border p-2 rounded-lg px-4 font-mono">{`npm install -g apm-tool`}</Markdown>
+                <Markdown className="markdown bg-[#f6f6f6] border border-[#e7e7e7] p-2 rounded-[12px] px-4 font-mono">{`npm install -g apm-tool`}</Markdown>
                 You can run the interactive menu by just running
-                <Markdown className="markdown bg-gray-100 border p-2 rounded-lg px-4 font-mono">{`apm
+                <Markdown className="markdown bg-[#f6f6f6] border border-[#e7e7e7] p-2 rounded-[12px] px-4 font-mono">{`apm
 
 -- or if you dont want to install it globally
 
@@ -18,7 +18,7 @@ npx apm-tool`}</Markdown>
             </div>
             <div className="flex flex-col gap-2">
                 <div className="text-xl font-bold">Step 2: Initialise an APM package</div>
-                <Markdown className="markdown bg-gray-100 border p-2 rounded-lg px-4 font-mono">apm init</Markdown>
+                <Markdown className="markdown bg-[#f6f6f6] border border-[#e7e7e7] p-2 rounded-[12px] px-4 font-mono">apm init</Markdown>
                 and enter all the details asked for, in the terminal
             </div>
             <div className="flex flex-col gap-2">
@@ -28,18 +28,18 @@ npx apm-tool`}</Markdown>
             <div className="flex flex-col gap-2">
                 <div className="text-xl font-bold">Step 4: Publish the package</div>
                 Make sure you have a wallet file to use for publishing, then run:
-                <Markdown className="markdown bg-gray-100 border p-2 rounded-lg px-4 font-mono">apm publish</Markdown>
+                <Markdown className="markdown bg-[#f6f6f6] border border-[#e7e7e7] p-2 rounded-[12px] px-4 font-mono">apm publish</Markdown>
                 it takes all details from the apm.json file and ask for the wallet file path if not found in the apm.json file.<br /><br />
                 If you dont want to puslish from the cli using a wallet file, you can also publish from the web by running
-                <Markdown className="markdown bg-gray-100 border p-2 rounded-lg px-4 font-mono">apm bundle</Markdown>
+                <Markdown className="markdown bg-[#f6f6f6] border border-[#e7e7e7] p-2 rounded-[12px] px-4 font-mono">apm bundle</Markdown>
                 which will create a dist folder which you can drag and drop in the web publisher<br /><br />
                 Note: You may also register a vendor name before publishing a package to publish under a custom vendor name instead of the default @apm
-                <Markdown className="markdown bg-gray-100 border p-2 rounded-lg px-4 font-mono">apm register-vendor</Markdown>
+                <Markdown className="markdown bg-[#f6f6f6] border border-[#e7e7e7] p-2 rounded-[12px] px-4 font-mono">apm register-vendor</Markdown>
             </div>
             <div className="flex flex-col gap-2">
                 <div className="text-xl font-bold">Voila! you just published a package to the permaweb</div>
                 <div className="text-lg">You can install the package by running the following command in your ao process</div>
-                <Markdown className="markdown bg-gray-100 border p-2 rounded-lg px-4 font-mono">
+                <Markdown className="markdown bg-[#f6f6f6] border border-[#e7e7e7] p-2 rounded-[12px] px-4 font-mono">
                     {`.load-blueprint apm
 
 apm.install "package_name"`}

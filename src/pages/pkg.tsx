@@ -9,19 +9,28 @@ import Markdown from "markdown-to-jsx"
 import Image from "next/image"
 import betterideaSVG from "@/assets/betteridea.svg"
 import Link from "next/link"
-import { GitHubLogoIcon, IdCardIcon, PersonIcon } from "@radix-ui/react-icons"
+import { GitHubLogoIcon, IdCardIcon, PersonIcon, ReloadIcon, CopyIcon, CheckIcon } from "@radix-ui/react-icons"
 import Footer from "@/components/footer"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
+import lua from 'react-syntax-highlighter/dist/esm/languages/hljs/lua'; // or prism/lua
+import docco from 'react-syntax-highlighter/dist/esm/styles/hljs/docco'; // Example style
+
+SyntaxHighlighter.registerLanguage('lua', lua);
 
 export default function PackageView() {
     const [pkg, setPackage] = useState<Package>()
+    const [isLoading, setIsLoading] = useState<boolean>(false)
     const [vendor, setVendor] = useState<string>("")
     const [pkgname, setPkgName] = useState<string>("")
     const [version, setVersion] = useState<string>("")
+    const [activeTab, setActiveTab] = useState<string>("readme")
     const [address, setAddress] = useState<string>("")
     const [transferAddress, setTransferAddress] = useState<string>("")
-    const ao = connect()
+    const [copiedInstall, setCopiedInstall] = useState<boolean>(false)
+    const ao = connect({ CU_URL: "https://cu.arnode.asia" })
     const router = useRouter()
     const { id, name } = router.query
 
@@ -29,6 +38,11 @@ export default function PackageView() {
     useEffect(() => {
         if (!(id || name)) return
         console.log("Fetching package with ID or name:", id || name)
+        // when route (id/name) changes (including selecting a version), go to Readme tab
+        setActiveTab("readme")
+        // reset state to avoid showing stale data during navigation
+        setIsLoading(true)
+        setPackage(undefined)
 
         async function fetchPackage() {
             let vendor, pkgname, version
@@ -86,9 +100,23 @@ export default function PackageView() {
                     console.error(e)
                 }
             }
+            setIsLoading(false)
         }
         fetchPackage()
     }, [id, name])
+
+    function formatRelativeTime(timestamp?: number) {
+        if (!timestamp) return "";
+        const diffMs = Date.now() - timestamp
+        const sec = Math.floor(diffMs / 1000)
+        const min = Math.floor(sec / 60)
+        const hr = Math.floor(min / 60)
+        const day = Math.floor(hr / 24)
+        if (day > 0) return `${day} day${day > 1 ? 's' : ''} ago`
+        if (hr > 0) return `${hr} hour${hr > 1 ? 's' : ''} ago`
+        if (min > 0) return `${min} minute${min > 1 ? 's' : ''} ago`
+        return `just now`
+    }
 
     async function connectWallet() {
         await window.arweaveWallet?.connect(["SIGN_TRANSACTION", "ACCESS_ADDRESS"])
@@ -136,80 +164,326 @@ export default function PackageView() {
         }
     }
 
+    function safeParseJSON<T>(maybeJSON: any, fallback: T): T {
+        try {
+            if (typeof maybeJSON === 'string') return JSON.parse(maybeJSON) as T
+            return (maybeJSON as T) ?? fallback
+        } catch {
+            return fallback
+        }
+    }
+
+    const parsedDependencies = safeParseJSON<{ [k: string]: { version: string } }>(pkg?.Dependencies, {})
+    const parsedAuthors = safeParseJSON<{ name: string, email: string, url: string, address: string }[]>(pkg?.Authors || pkg?.Authors_, [])
+    const parsedKeywords = safeParseJSON<string[]>(pkg?.Keywords, [])
+    const parsedWarnings = safeParseJSON<{ modifiesGlobalState?: boolean, installMessage?: string }>(pkg?.Warnings, {})
+
     return <><div className="p-5 min-h-screen">
         <title suppressHydrationWarning>{pkg?.Name ? `${pkg?.Vendor}/${pkg?.Name}` : "Loading..."} | APM | BetterIDEa</title>
-        <Link href="/" className="text-2xl p-5 flex gap-3 items-center"><Image width={35} height={35} alt="apm" src={"/icon.svg"} /> APM</Link>
-        <hr className="my-3" />
-        <div className="text-3xl md:ml-5 font-bold flex items-center">
-            {pkg?.Vendor && (["@apm"].includes(pkg?.Vendor as string) ? "" : `${pkg?.Vendor}/`)}{pkg?.Name ? pkg?.Name : "Loading..."}
-            <Link href={pkg?.Repository || "#"}><GitHubLogoIcon width={28} height={28} className="mx-2" /></Link>
+        <div className="max-w-6xl mx-auto">
+            <Link href="/" className="text-2xl p-5 flex gap-3 items-center"><Image width={35} height={35} alt="apm" src={"/icon.svg"} /> APM</Link>
+            <div className="border-b my-3" />
+
+            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                <div className="w-full">
+                    {isLoading || !pkg ? (
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <Skeleton className="h-8 w-48" />
+                            </div>
+                            <Skeleton className="h-4 w-80 mt-2" />
+                            <Skeleton className="h-3 w-64 mt-1" />
+                        </div>
+                    ) : (
+                        <>
+                            <div className="text-3xl font-bold flex items-center gap-2">
+                                {pkg?.Vendor && (["@apm"].includes(pkg?.Vendor as string) ? "" : `${pkg?.Vendor}/`)}{pkg?.Name}
+                                <Link href={pkg?.Repository || "#"}><GitHubLogoIcon width={24} height={24} className="mx-1" /></Link>
+                            </div>
+                            <div className="text-[#555]">{pkg?.Description}</div>
+                            <div className="text-sm text-[#777]">{pkg?.Version && `v${pkg?.Version}`} • {pkg?.Installs} installs • published {formatRelativeTime(pkg?.Timestamp)}</div>
+                        </>
+                    )}
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
+                <div className="lg:col-span-8">
+                    {/* top tabs */}
+                    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col">
+                        <div className="w-full">
+                            <TabsList className="bg-[#f4f4f4] w-full rounded-[12px] p-0 grid grid-cols-4 md:w-fit md:inline-flex md:rounded-full">
+                                <TabsTrigger value="readme" className="rounded-full px-4 py-2 data-[state=active]:bg-[#68A04E] data-[state=active]:text-white">Readme</TabsTrigger>
+                                <TabsTrigger value="source" className="rounded-full px-4 py-2 data-[state=active]:bg-[#68A04E] data-[state=active]:text-white">Code</TabsTrigger>
+                                <TabsTrigger value="dependencies" className="rounded-full px-4 py-2 data-[state=active]:bg-[#68A04E] data-[state=active]:text-white">{Object.keys(parsedDependencies || {}).length ? `${Object.keys(parsedDependencies || {}).length} Dependencies` : '0 Dependencies'}</TabsTrigger>
+                                <TabsTrigger value="versions" className="rounded-full px-4 py-2 data-[state=active]:bg-[#68A04E] data-[state=active]:text-white">{pkg?.Versions ? `${pkg?.Versions?.length} Versions` : 'Versions'}</TabsTrigger>
+                                <TabsTrigger value="config" className="rounded-full px-4 py-2 data-[state=active]:bg-[#68A04E] data-[state=active]:text-white hidden md:inline-flex">Settings</TabsTrigger>
+                            </TabsList>
+                        </div>
+                        <div className="my-4 w-full h-full bg-[#fff]">
+                            <TabsContent value="readme">
+                                <div className="rounded-[16px] bg-white">
+                                    {isLoading || !pkg ? (
+                                        <div className="space-y-2 p-4">
+                                            <Skeleton className="h-4 w-[95%]" />
+                                            <Skeleton className="h-4 w-[90%]" />
+                                            <Skeleton className="h-4 w-[92%]" />
+                                            <Skeleton className="h-4 w-[85%]" />
+                                        </div>
+                                    ) : (
+                                        <Markdown
+                                            options={{
+                                                disableParsingRawHTML: true,
+                                                overrides: {
+                                                    pre: {
+                                                        component: ({ children, ...props }) => {
+                                                            const child = Array.isArray(children) ? children[0] : children
+                                                            const className = child?.props?.className || ""
+                                                            const match = (className.match(/language-([a-z0-9]+)/i) || className.match(/lang-([a-z0-9]+)/i))
+                                                            const language = match ? match[1] : 'lua'
+                                                            const codeString = child?.props?.children || ''
+                                                            return (
+                                                                <SyntaxHighlighter
+                                                                    language={language}
+                                                                    style={docco}
+                                                                // customStyle={{ paddingTop: "8px", paddingBottom: "8px", borderRadius: "10px" }}
+                                                                >
+                                                                    {typeof codeString === 'string' ? codeString : String(codeString)}
+                                                                </SyntaxHighlighter>
+                                                            )
+                                                        }
+                                                    },
+                                                    code: {
+                                                        component: ({ children, className, ...props }) => {
+                                                            const hasLanguage = /language-|lang-/.test(className || '')
+                                                            if (hasLanguage) {
+                                                                return <code {...props} className={className}>{children}</code>
+                                                            }
+                                                            return <code {...props} className="bg-[#f6f6f6] px-1.5 py-0.5 rounded text-sm">{children}</code>
+                                                        }
+                                                    }
+                                                }
+                                            }}
+                                            className="markdown overflow-scroll">
+                                            {Buffer.from(pkg?.Readme || "", 'hex').toString().trim()}
+                                        </Markdown>
+                                    )}
+                                </div>
+                            </TabsContent>
+                            <TabsContent value="source">
+                                <div className="rounded-[16px] bg-white">
+                                    {isLoading || !pkg ? (
+                                        <div className="space-y-2 p-4">
+                                            <Skeleton className="h-4 w-[95%]" />
+                                            <Skeleton className="h-4 w-[90%]" />
+                                            <Skeleton className="h-4 w-[92%]" />
+                                            <Skeleton className="h-4 w-[85%]" />
+                                        </div>
+                                    ) : (
+                                        <pre className="">
+                                            {/* <code>
+                                                {function () {
+                                                    if (pkg?.Source) return (Buffer.from(pkg?.Source || "", 'hex').toString()).trim()
+                                                    else return "... ? ..."
+                                                }()}
+                                            </code> */}
+                                            <SyntaxHighlighter language="lua" style={docco} customStyle={{ paddingTop: "8px", paddingBottom: "8px", borderRadius: "10px" }} showLineNumbers>
+                                                {function () {
+                                                    if (pkg?.Source) return (Buffer.from(pkg?.Source || "", 'hex').toString()).trim()
+                                                    else return "-- source code not found\n-- please contact the author"
+                                                }()}
+                                            </SyntaxHighlighter>
+                                        </pre>
+                                    )}
+                                </div>
+                            </TabsContent>
+                            <TabsContent value="dependencies">
+                                <div className="rounded-[16px] p-4">
+                                    {isLoading || !pkg ? (
+                                        <div className="space-y-2">
+                                            <Skeleton className="h-10 w-full" />
+                                            <Skeleton className="h-10 w-full" />
+                                            <Skeleton className="h-10 w-full" />
+                                        </div>
+                                    ) : (
+                                        Object.keys(parsedDependencies).length === 0 ? (
+                                            <div className="text-sm text-[#666]">No dependencies</div>
+                                        ) : (
+                                            <div className="flex flex-col gap-2">
+                                                {Object.entries(parsedDependencies).map(([name, meta]) => (
+                                                    <Link
+                                                        href={`/pkg?name=${encodeURIComponent(name)}@${encodeURIComponent(meta?.version || 'latest')}`}
+                                                        key={name}
+                                                        className="group flex items-center justify-between gap-3 p-3 rounded-lg border border-[#e7e7e7] bg-white hover:bg-[#fafafa] hover:border-[#dcdcdc] transition-colors">
+                                                        <span className="font-mono text-sm truncate group-hover:underline">{name}</span>
+                                                        <span className="text-xs bg-[#f4f4f4] px-2 py-1 rounded-md font-mono">{meta?.version || 'latest'}</span>
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        )
+                                    )}
+                                </div>
+                            </TabsContent>
+                            <TabsContent value="config" className="flex flex-col gap-2">
+                                <div className="bg-[#eee] rounded-[16px] p-4">
+                                    <div>Published: {pkg?.Timestamp ? new Date(pkg?.Timestamp as number).toString() : ""}</div>
+                                    <div>DBID: {pkg?.ID}</div>
+                                    <div>PkgID: {pkg?.PkgID}</div>
+                                    <div>Version: {pkg?.Version}</div>
+                                    <div>Total Installs (all versions): {pkg?.TotalInstalls}</div>
+                                    <div>Owner: {pkg?.Owner}</div>
+                                    <div>Repository: <Link href={pkg?.Repository || "#"}
+                                        target="_blank"
+                                        rel="noopener noreferrer" className="text-[#68A04E]">{pkg?.Repository}</Link></div>
+
+                                    <div className="flex gap-2 my-2">
+                                        <Input type="text" placeholder="Transfer to process or address" onChange={(e) => setTransferAddress(e.target.value)} />
+                                        {address ? <Button onClick={transferOwnership}>Transfer Ownership</Button> : <Button onClick={connectWallet}>Connect Wallet</Button>}
+                                    </div>
+                                </div>
+                            </TabsContent>
+                            <TabsContent value="versions" className="flex flex-col-reverse gap-2">
+                                {isLoading || !pkg ? (
+                                    <div className="space-y-2 p-2">
+                                        <Skeleton className="h-10 w-full" />
+                                        <Skeleton className="h-10 w-full" />
+                                        <Skeleton className="h-10 w-full" />
+                                    </div>
+                                ) : pkg?.Versions?.map((v, i) => {
+                                    const isSelected = (version || pkg?.Version) === v.Version
+                                    let endpoint = "/pkg?name="
+                                    if (pkg?.Vendor) endpoint += `${pkg?.Vendor}/`
+                                    if (pkg?.Name) endpoint += pkg?.Name
+                                    endpoint += `@${v.Version}`
+
+                                    return (
+                                        <Link
+                                            href={endpoint}
+                                            key={i}
+                                            onClick={() => setActiveTab('readme')}
+                                            className={`group flex items-center justify-between gap-3 p-3 rounded-lg border bg-white transition-colors ${isSelected ? 'border-[#68A04E] bg-[#68A04E]/10' : 'border-[#e7e7e7] hover:bg-[#fafafa] hover:border-[#dcdcdc]'}`}
+                                        >
+                                            <div className="flex items-center gap-2 min-w-0">
+                                                <span className="font-mono text-sm truncate group-hover:underline">{v.Version}</span>
+                                                {isSelected && <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#68A04E] text-white">selected</span>}
+                                            </div>
+                                            <div className="flex items-center gap-2 shrink-0">
+                                                <span className="text-xs bg-[#f4f4f4] px-2 py-1 rounded-md font-mono">{v.Installs} installs</span>
+                                            </div>
+                                        </Link>
+                                    )
+                                })}
+                            </TabsContent>
+                        </div>
+                    </Tabs>
+                </div>
+
+                {/* Sidebar */}
+                <aside className="lg:col-span-4 flex flex-col gap-4">
+                    {isLoading || !pkg ? (
+                        <>
+                            <div className="bg-[#f6f6f6] p-4 rounded-[16px]">
+                                <div className="text-sm text-[#666]">Install</div>
+                                <div className="mt-3"><Skeleton className="h-10 w-full rounded-[12px]" /></div>
+                            </div>
+                            <div className="bg-[#f6f6f6] p-4 rounded-[16px] flex flex-col gap-2">
+                                <div className="text-sm text-[#666]">Repository</div>
+                                <Skeleton className="h-4 w-40" />
+                            </div>
+                            <div className="bg-[#f6f6f6] p-4 rounded-[16px] flex flex-col gap-2">
+                                <Skeleton className="h-4 w-24" />
+                                <Skeleton className="h-4 w-36" />
+                                <Skeleton className="h-4 w-32" />
+                                <Skeleton className="h-4 w-28" />
+                                <Skeleton className="h-4 w-52" />
+                                <Skeleton className="h-4 w-60" />
+                            </div>
+                            <div className="bg-[#f6f6f6] p-4 rounded-[16px] flex flex-col gap-2">
+                                <div className="text-sm text-[#666]">Authors</div>
+                                <Skeleton className="h-4 w-28" />
+                                <Skeleton className="h-4 w-48" />
+                            </div>
+                            <div className="bg-[#f6f6f6] p-4 rounded-[16px] flex flex-col gap-2">
+                                <div className="text-sm text-[#666]">Keywords</div>
+                                <div className="flex gap-2">
+                                    <Skeleton className="h-6 w-16 rounded-full" />
+                                    <Skeleton className="h-6 w-20 rounded-full" />
+                                    <Skeleton className="h-6 w-14 rounded-full" />
+                                </div>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <div className="bg-[#f6f6f6] p-4 rounded-[16px]">
+                                <div className="text-sm text-[#666]">Install</div>
+                                <div className="mt-3 flex items-center gap-2">
+                                    <code className="flex-1 bg-white border border-[#e7e7e7] p-3 rounded-[12px] text-sm overflow-x-auto">apm.install "{pkg?.Vendor == "@apm" ? "" : pkg?.Vendor + "/"}{pkg?.Name}{(version && version !== "latest") ? "@" + version : ''}"</code>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        aria-label="Copy install command"
+                                        className=" rounded-[10px] w-5 h-5"
+                                        onClick={() => {
+                                            const cmd = `apm.install "${pkg?.Vendor == "@apm" ? "" : pkg?.Vendor + "/"}${pkg?.Name}${(version && version !== "latest") ? "@" + version : ''}"`
+                                            navigator.clipboard.writeText(cmd)
+                                            setCopiedInstall(true)
+                                            window.setTimeout(() => setCopiedInstall(false), 1000)
+                                        }}
+                                    >
+                                        {copiedInstall ? <CheckIcon /> : <CopyIcon />}
+                                    </Button>
+                                </div>
+                            </div>
+                            <div className="bg-[#f6f6f6] p-4 rounded-[16px] flex flex-col gap-1">
+                                <div className="text-sm text-[#666]">Repository</div>
+                                <Link href={pkg?.Repository || '#'} target="_blank" className="text-[#68A04E] break-all">{pkg?.Repository || 'N/A'}</Link>
+                            </div>
+                            <div className="bg-[#f6f6f6] p-4 rounded-[16px] flex flex-col gap-1">
+                                <div className="flex justify-between text-sm"><span>Version</span><span className="font-mono">{pkg?.Version}</span></div>
+                                <div className="flex justify-between text-sm"><span>Installs (current version)</span><span className="font-mono">{pkg?.Installs}</span></div>
+                                <div className="flex justify-between text-sm"><span>Total Installs</span><span className="font-mono">{pkg?.TotalInstalls}</span></div>
+                                <div className="flex justify-between text-sm"><span>Published</span><span className="font-mono">{formatRelativeTime(pkg?.Timestamp)}</span></div>
+                                <div className="flex items-center gap-2 text-sm truncate"><PersonIcon width={16} height={16} /> <span className="truncate">{pkg?.Owner}</span></div>
+                                <div className="flex items-center gap-2 text-sm truncate"><IdCardIcon width={16} height={16} /> <span className="truncate">{pkg?.PkgID}</span></div>
+                            </div>
+
+                            {parsedAuthors.length > 0 && (
+                                <div className="bg-[#f6f6f6] p-4 rounded-[16px] flex flex-col gap-2">
+                                    <div className="text-sm text-[#666]">Authors</div>
+                                    <div className="flex flex-col gap-2">
+                                        {parsedAuthors.map((a, i) => (
+                                            <div key={i} className="text-sm">
+                                                <div className="font-medium">{a.name}</div>
+                                                <div className="text-[#666] break-all">{a.email}</div>
+                                                <Link href={a.url || '#'} target="_blank" className="text-[#68A04E] break-all">{a.url}</Link>
+                                                <div className="text-xs text-[#666] break-all">{a.address}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                            {parsedKeywords.length > 0 && (
+                                <div className="bg-[#f6f6f6] p-4 rounded-[16px] flex flex-col gap-2">
+                                    <div className="text-sm text-[#666]">Keywords</div>
+                                    <div className="flex flex-wrap gap-2">
+                                        {parsedKeywords.map((k, i) => (
+                                            <span key={i} className="text-xs px-2 py-1 rounded-full bg-white border">{k}</span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                            {(pkg?.License || parsedWarnings.installMessage || parsedWarnings.modifiesGlobalState) && (
+                                <div className="bg-[#f6f6f6] p-4 rounded-[16px] flex flex-col gap-2">
+                                    {pkg?.License && <div className="text-sm"><span className="text-[#666]">License:</span> <span className="font-mono">{pkg?.License}</span></div>}
+                                    {parsedWarnings.installMessage && <div className="text-sm text-[#a15c00]">⚠️ {parsedWarnings.installMessage}</div>}
+                                    {parsedWarnings.modifiesGlobalState && <div className="text-sm text-[#a15c00]">⚠️ Modifies global state</div>}
+                                </div>
+                            )}
+                        </>
+                    )}
+                </aside>
+            </div>
         </div>
-        <div className="md:ml-5">{pkg?.Description}</div>
-        <div className="md:ml-5">{pkg?.Version && `V${pkg?.Version}`} - {pkg?.Installs} installs</div>
-        <div className="md:ml-5 text-sm truncate md:text-base flex gap-2 items-center"><PersonIcon width={20} height={20} /> {pkg?.Owner && pkg?.Owner}</div>
-        <div className="md:ml-5 text-sm truncate md:text-base flex gap-2 items-center"><IdCardIcon width={20} height={20} /> {pkg?.PkgID && pkg?.PkgID}</div>
-        <hr className="my-3" />
-        {/* tabview */}
-        <Tabs defaultValue="readme" className="w-full flex flex-col items-center">
-            <div className="flex flex-row items-center justify-center relative w-full">
-                <TabsList className="bg-[#EEEEEE] w-full md:w-fit rounded-[16px] flex flex-col md:flex-row h-fit">
-                    <TabsTrigger value="readme" className="rounded-[16px] w-full p-3 px-4 data-[state=active]:bg-[#68A04E] data-[state=active]:text-white">Readme</TabsTrigger>
-                    <TabsTrigger value="source" className="rounded-[16px] w-full p-3 px-4 data-[state=active]:bg-[#68A04E] data-[state=active]:text-white">Source Code</TabsTrigger>
-                    {/* <TabsTrigger value="info" className="rounded-full p-3 px-4 data-[state=active]:bg-[#68A04E] data-[state=active]:text-white">Info</TabsTrigger> */}
-                    <TabsTrigger value="install" className="rounded-[16px] w-full p-3 px-4 data-[state=active]:bg-[#68A04E] data-[state=active]:text-white">Install</TabsTrigger>
-                    <TabsTrigger value="versions" className="rounded-[16px] w-full p-3 px-4 data-[state=active]:bg-[#68A04E] data-[state=active]:text-white">Version History</TabsTrigger>
-                    <TabsTrigger value="config" className="rounded-[16px] w-full p-3 px-4 data-[state=active]:bg-[#68A04E] data-[state=active]:text-white">Config</TabsTrigger>
-                </TabsList>
-            </div>
-            <div className="my-5 w-full h-full px-5 bg-[#eee] rounded-[16px] pb-2">
-                <TabsContent value="readme">
-                    <Markdown className="markdown overflow-scroll">{Buffer.from(pkg?.Readme || "", 'hex').toString()}</Markdown>
-                </TabsContent>
-                <TabsContent value="source">
-                    <pre className=" overflow-scroll">
-                        <code>
-                            {function () {
-                                if (pkg?.Source) return (Buffer.from(pkg?.Source || "", 'hex').toString())
-                                else return "..."
-                            }()}
-                        </code>
-                    </pre>
-                </TabsContent>
-                <TabsContent value="config" className="flex flex-col gap-1">
-                    <div>Published: {new Date(pkg?.Timestamp as number).toString()}</div>
-                    <div>DBID: {pkg?.ID}</div>
-                    <div>PkgID: {pkg?.PkgID}</div>
-                    <div>Version: {pkg?.Version}</div>
-                    <div>Total Installs (all versions): {pkg?.TotalInstalls}</div>
-                    <div>Owner: {pkg?.Owner}</div>
-                    <div>Repository: <Link href={pkg?.Repository || "#"}
-                        target="_blank"
-                        rel="noopener noreferrer" className="text-[#68A04E]">{pkg?.Repository}</Link></div>
-
-                    <div className="flex gap-2 my-1">
-                        <Input type="text" placeholder="Transfer to process or address" onChange={(e) => setTransferAddress(e.target.value)} />
-                        {address ? <Button onClick={transferOwnership}>Transfer Ownership</Button> : <Button onClick={connectWallet}>Connect Wallet</Button>}
-                    </div>
-                </TabsContent>
-                <TabsContent value="install">
-                    <div className="flex flex-col p-5">Installation command <code className="bg-white mt-3 p-3 rounded-[16px] pointer-events-auto">apm.install "{pkg?.Vendor == "@apm" ? "" : pkg?.Vendor + "/"}{pkg?.Name}{version && (version == "latest" ? "" : "@" + version)}"</code></div>
-                </TabsContent>
-                <TabsContent value="versions" className="flex flex-col-reverse gap-2">
-                    {
-                        pkg?.Versions?.map((v, i) => {
-                            let endpoint = "/pkg?name="
-                            if (pkg?.Vendor) endpoint += `${pkg?.Vendor}/`
-                            if (pkg?.Name) endpoint += pkg?.Name
-                            endpoint += `@${v.Version}`
-
-                            return <Link href={endpoint} key={i} className="p-4 font-mono bg-white rounded-[16px] text-sm md:text-base truncate overflow-scroll">
-                                <div>{v.Version} | {v.Installs} installs | <span className="text-xs">{v.PkgID}</span></div>
-                            </Link>
-                        })
-                    }
-                </TabsContent>
-            </div>
-        </Tabs>
     </div>
         <Footer />
     </>

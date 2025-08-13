@@ -33,6 +33,7 @@
     --ring: 240 10% 3.9%;
 
     --radius: 0.5rem;
+    --apm-radius: 12px;
   }
 
   .dark {
@@ -66,6 +67,12 @@
   }
 }
 
+@layer utilities {
+  .rounded-std {
+    border-radius: var(--apm-radius);
+  }
+}
+
 @layer base {
   * {
     @apply border-border;
@@ -76,7 +83,7 @@
   }
 }
 
-*{
+* {
   user-select: auto !important;
 }
 

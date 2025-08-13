@@ -9,13 +9,14 @@ import { APM_ID, Tag } from "@/utils/ao-vars"
 import { ReloadIcon } from "@radix-ui/react-icons"
 import Image from "next/image"
 import betterideaSVG from "@/assets/betteridea.svg"
+import { useLocalStorage } from "usehooks-ts"
 
 function TextInput({ placeholder, onChange, icon }: {
     placeholder: string,
     onChange: Dispatch<SetStateAction<string>>,
     icon: React.ReactNode
 }) {
-    return <div className="bg-[#EEE] p-3 rounded-[16px] flex gap-2 items-center">
+    return <div className="bg-white border border-[#e7e7e7] p-3 rounded-[12px] flex gap-2 items-center">
         <div>{icon}</div>
         <input className="outline-none w-full bg-transparent text-[#666]" placeholder={placeholder} onChange={(e) => onChange(e.target.value)} />
     </div>
@@ -25,7 +26,7 @@ export default function NewVendor() {
     const [address, setAddress] = useState<string>("")
     const [vendorName, setVendorName] = useState<string>("")
     const [registering, setRegistering] = useState<boolean>(false)
-
+    const [cuUrl] = useLocalStorage("apm-cu-url", "https://cu.arnode.asia", { initializeWithValue: true })
 
     async function connectWallet() {
         await window.arweaveWallet.connect(["SIGN_TRANSACTION", "ACCESS_ADDRESS"])
@@ -41,7 +42,7 @@ export default function NewVendor() {
         if (vendorName.length < 4) return toast.error("Vendor name should be atleast 3 characters long")
         if (vendorName.length > 20) return toast.error("Vendor name should be less than 20 characters long")
 
-        const ao = connect()
+        const ao = connect({ CU_URL: cuUrl })
 
         setRegistering(true)
         const m_id = await ao.message({
@@ -90,7 +91,7 @@ export default function NewVendor() {
             <Tabs defaultValue="" value="" className="w-full flex flex-col items-center p-5 md:p-10 md:px-24">
                 <div className="flex flex-col items-center justify-center relative w-full">
                     <Link href="/" className="md:absolute left-0 p-5 md:p-0 flex gap-3 items-center text-xl"><Image alt="logo" src={"/icon.svg"} width={35} height={35} /> APM</Link>
-                    <Link href="/"><TabsList className="bg-[#EEEEEE] w-fit rounded-full h-fit">
+                    <Link href="/"><TabsList className="bg-[#f4f4f4] w-fit rounded-full h-fit">
                         <TabsTrigger value="explore" className="rounded-full p-3 px-4 data-[state=active]:bg-[#68A04E] data-[state=active]:text-white">Registry</TabsTrigger>
                         <TabsTrigger value="publish" className="rounded-full p-3 px-4 data-[state=active]:bg-[#68A04E] data-[state=active]:text-white">Publish Package</TabsTrigger>
                         <TabsTrigger value="guide" className="rounded-full p-3 px-4 data-[state=active]:bg-[#68A04E] data-[state=active]:text-white">Guide</TabsTrigger>

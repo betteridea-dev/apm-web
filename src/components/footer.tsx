@@ -1,5 +1,6 @@
 import { APM_ID } from "@/utils/ao-vars";
 import { DiscordLogoIcon } from "@radix-ui/react-icons";
+import betterideaSVG from "@/assets/betteridea.svg"
 import Link from "next/link";
 import Image from "next/image";
 
@@ -10,8 +11,8 @@ export default function Footer() {
         <div>
             <Link href="https://betteridea.dev" target="_blank" className="flex items-center">
                 {/* <DiscordLogoIcon className="w-8 h-8 mr-2" /> */}
-                <Image src={`https://betteridea.dev/logo.png`} alt="betteridea" className="w-10 h-10" width={100} height={100} />
-                Made with ❤️ by BetterIDEa
+                <Image src={betterideaSVG} alt="betteridea" className="w-10 h-10" width={100} height={100} />
+                Made with ❤️ by BetterIDEa Team
             </Link>
         </div>
         <div className="flex flex-col md:flex-row gap-3 items-center">
