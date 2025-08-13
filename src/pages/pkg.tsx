@@ -14,11 +14,8 @@ import Footer from "@/components/footer"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
-import lua from 'react-syntax-highlighter/dist/esm/languages/hljs/lua'; // or prism/lua
-import docco from 'react-syntax-highlighter/dist/esm/styles/hljs/docco'; // Example style
-
-SyntaxHighlighter.registerLanguage('lua', lua);
+import dynamic from "next/dynamic"
+const SyntaxHighlighter = dynamic(() => import("@/components/LuaSyntaxHighlighter"), { ssr: false })
 
 export default function PackageView() {
     const [pkg, setPackage] = useState<Package>()
@@ -234,35 +231,6 @@ export default function PackageView() {
                                         <Markdown
                                             options={{
                                                 disableParsingRawHTML: true,
-                                                overrides: {
-                                                    pre: {
-                                                        component: ({ children, ...props }) => {
-                                                            const child = Array.isArray(children) ? children[0] : children
-                                                            const className = child?.props?.className || ""
-                                                            const match = (className.match(/language-([a-z0-9]+)/i) || className.match(/lang-([a-z0-9]+)/i))
-                                                            const language = match ? match[1] : 'lua'
-                                                            const codeString = child?.props?.children || ''
-                                                            return (
-                                                                <SyntaxHighlighter
-                                                                    language={language}
-                                                                    style={docco}
-                                                                // customStyle={{ paddingTop: "8px", paddingBottom: "8px", borderRadius: "10px" }}
-                                                                >
-                                                                    {typeof codeString === 'string' ? codeString : String(codeString)}
-                                                                </SyntaxHighlighter>
-                                                            )
-                                                        }
-                                                    },
-                                                    code: {
-                                                        component: ({ children, className, ...props }) => {
-                                                            const hasLanguage = /language-|lang-/.test(className || '')
-                                                            if (hasLanguage) {
-                                                                return <code {...props} className={className}>{children}</code>
-                                                            }
-                                                            return <code {...props} className="bg-[#f6f6f6] px-1.5 py-0.5 rounded text-sm">{children}</code>
-                                                        }
-                                                    }
-                                                }
                                             }}
                                             className="markdown overflow-scroll">
                                             {Buffer.from(pkg?.Readme || "", 'hex').toString().trim()}
@@ -287,7 +255,7 @@ export default function PackageView() {
                                                     else return "... ? ..."
                                                 }()}
                                             </code> */}
-                                            <SyntaxHighlighter language="lua" style={docco} customStyle={{ paddingTop: "8px", paddingBottom: "8px", borderRadius: "10px" }} showLineNumbers>
+                                            <SyntaxHighlighter language="lua" showLineNumbers>
                                                 {function () {
                                                     if (pkg?.Source) return (Buffer.from(pkg?.Source || "", 'hex').toString()).trim()
                                                     else return "-- source code not found\n-- please contact the author"
