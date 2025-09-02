@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import dynamic from "next/dynamic"
 const SyntaxHighlighter = dynamic(() => import("@/components/LuaSyntaxHighlighter"), { ssr: false })
+import { useLocalStorage } from "usehooks-ts"
 
 export default function PackageView() {
     const [pkg, setPackage] = useState<Package>()
@@ -27,7 +28,8 @@ export default function PackageView() {
     const [address, setAddress] = useState<string>("")
     const [transferAddress, setTransferAddress] = useState<string>("")
     const [copiedInstall, setCopiedInstall] = useState<boolean>(false)
-    const ao = connect({ CU_URL: "https://cu.arnode.asia" })
+    const [cuUrl] = useLocalStorage("apm-cu-url", "https://cu.ardrive.io", { initializeWithValue: true })
+    const ao = connect({ CU_URL: cuUrl })
     const router = useRouter()
     const { id, name } = router.query
 

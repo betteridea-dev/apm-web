@@ -47,7 +47,7 @@ export default function Publish() {
     const [bundledSrc, setBundledSrc] = useState<string>("")
     const [readme, setReadme] = useState<string>("")
     const [publishing, setPublishing] = useState<boolean>(false)
-    const [cuUrl] = useLocalStorage("apm-cu-url", "https://cu.arnode.asia", { initializeWithValue: true })
+    const [cuUrl] = useLocalStorage("apm-cu-url", "https://cu.ardrive.io", { initializeWithValue: true })
     const router = useRouter()
 
     useEffect(() => {

@@ -74,7 +74,7 @@ export default function Registry() {
     const [searchQuery, setSearchQuery] = useState<string>("")
     const [packages, setPackages] = useLocalStorage<Package[]>("packages", [], { initializeWithValue: true })
     const [titleVisible, setTitleVisible] = useState(true)
-    const [cuUrl] = useLocalStorage("apm-cu-url", "https://cu.arnode.asia", { initializeWithValue: true })
+    const [cuUrl] = useLocalStorage("apm-cu-url", "https://cu.ardrive.io", { initializeWithValue: true })
     const ao = connect({ CU_URL: cuUrl })
 
     async function getPopular() {

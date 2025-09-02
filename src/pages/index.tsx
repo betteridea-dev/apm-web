@@ -28,7 +28,7 @@ import { toast } from "sonner";
 
 export default function Home() {
   const [cuUrlInput, setCuUrlInput] = useState("")
-  const [cuUrl, setCuUrl] = useLocalStorage("apm-cu-url", "https://cu.arnode.asia", { initializeWithValue: true })
+  const [cuUrl, setCuUrl] = useLocalStorage("apm-cu-url", "https://cu.ardrive.io", { initializeWithValue: true })
 
   useEffect(() => {
     setCuUrlInput(cuUrl)
@@ -56,10 +56,10 @@ export default function Home() {
                     <AlertDialogTitle>CU URL</AlertDialogTitle>
                     <AlertDialogDescription>
                       Which CU do you want to use for computation?<br />
-                      <span className="text-xs text-gray-500">default: https://cu.arnode.asia</span>
+                      <span className="text-xs text-gray-500">default: https://cu.ardrive.io</span>
                     </AlertDialogDescription>
                   </AlertDialogHeader>
-                  <Input type="text" placeholder="https://cu.arnode.asia" value={cuUrlInput} onChange={(e) => setCuUrlInput(e.target.value)} />
+                  <Input type="text" placeholder="https://cu.ardrive.io" value={cuUrlInput} onChange={(e) => setCuUrlInput(e.target.value)} />
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction onClick={() => {

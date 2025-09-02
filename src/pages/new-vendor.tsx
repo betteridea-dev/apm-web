@@ -26,7 +26,7 @@ export default function NewVendor() {
     const [address, setAddress] = useState<string>("")
     const [vendorName, setVendorName] = useState<string>("")
     const [registering, setRegistering] = useState<boolean>(false)
-    const [cuUrl] = useLocalStorage("apm-cu-url", "https://cu.arnode.asia", { initializeWithValue: true })
+    const [cuUrl] = useLocalStorage("apm-cu-url", "https://cu.ardrive.io", { initializeWithValue: true })
 
     async function connectWallet() {
         await window.arweaveWallet.connect(["SIGN_TRANSACTION", "ACCESS_ADDRESS"])
